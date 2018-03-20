@@ -1,5 +1,6 @@
 package server.storage;
 
+import api.multicast.Multicast;
 import api.storage.Namenode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -7,6 +8,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,8 @@ import java.util.Map;
  * @author David Romao 49309
  */
 public class NamenodeServer implements Namenode {
+    static final String NAMENODE = "namenode";
+    static final String multicastListener = "225.100.100.100";
     private Map<String,List<String>> nametable;
 
     @Override
@@ -81,6 +85,31 @@ public class NamenodeServer implements Namenode {
         config.register(new NamenodeServer());
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
-        System.err.println("Server ready....");
+        System.err.println("Server ready at ...."+URI_BASE);
+        PingReceiver pingReceiver = new PingReceiver(multicastListener,URI_BASE);
+        Thread thread = new Thread( pingReceiver);
+        thread.run();
+    }
+    private static class PingReceiver implements Runnable{
+        private final Multicast multicast;
+        private String answer;
+
+        public PingReceiver(String ip,String answer) {
+
+            this.multicast = new Multicast(ip, 8080);
+            this.answer = answer;
+        }
+
+        @Override
+        public void run() {
+            while (true){
+                try {
+                    multicast.receive(NAMENODE,answer);
+                } catch (UnknownHostException e) {
+                    System.err.println("Multicast ip not found.");
+                }
+            }
+
+        }
     }
 }
