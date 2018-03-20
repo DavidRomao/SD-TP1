@@ -17,8 +17,8 @@ import java.util.Map;
  * @author David Romao 49309
  */
 public class NamenodeServer implements Namenode {
-    static final String NAMENODE = "namenode";
-    static final String multicastListener = "225.100.100.100";
+    public static final String NAMENODE = "namenode";
+    public static final URI multicastListener = URI.create("http://225.100.100.100:8080");
     private Map<String,List<String>> nametable;
 
     @Override
@@ -94,9 +94,9 @@ public class NamenodeServer implements Namenode {
         private final Multicast multicast;
         private String answer;
 
-        public PingReceiver(String ip,String answer) {
+        public PingReceiver(URI uri,String answer) {
 
-            this.multicast = new Multicast(ip, 8080);
+            this.multicast = new Multicast(uri);
             this.answer = answer;
         }
 

@@ -1,20 +1,21 @@
 package api.multicast;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
+import java.net.*;
 
 public class Multicast {
 
     private final String ip;
     private final int port;
 
-    public Multicast(String ip, int port) {
-        this.ip = ip;
-        this.port = port;
+    public Multicast(URI uri) {
+        this.ip = uri.getHost();
+        this.port = uri.getPort();
+        System.out.println("ip = " + ip);
+        System.out.println("port = " + port);
     }
+
+        
 
     public void receive(String answer, String expected) throws UnknownHostException {
         final int MAX_DATAGRAM_SIZE = 65536;
