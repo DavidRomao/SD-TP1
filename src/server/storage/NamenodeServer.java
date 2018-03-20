@@ -1,7 +1,12 @@
-package api.storage;
+package server.storage;
+
+import api.storage.Namenode;
+import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +14,7 @@ import java.util.Map;
 /**
  * @author David Romao 49309
  */
-public class NamenodeImpl implements Namenode {
+public class NamenodeServer implements Namenode {
     private Map<String,List<String>> nametable;
 
     @Override
@@ -60,5 +65,22 @@ public class NamenodeImpl implements Namenode {
             if (s.startsWith(prefix))
                 nametable.remove(s);
         });
+    }
+
+    public static void main(String[] args) {
+
+
+        String URI_BASE;
+        try {
+            URI_BASE = args[0];
+        }catch ( ArrayIndexOutOfBoundsException e){
+            URI_BASE = "http://0.0.0.0:9998/v1/";
+        }
+
+        ResourceConfig config = new ResourceConfig();
+        config.register(new NamenodeServer());
+
+        JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
+        System.err.println("Server ready....");
     }
 }
