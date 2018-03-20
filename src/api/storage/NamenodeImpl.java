@@ -35,7 +35,9 @@ public class NamenodeImpl implements Namenode {
 
     @Override
     public void create(String name, List<String> blocks) {
-        if (nametable.containsKey(name))
+        if (blocks.size()==0)
+            throw new WebApplicationException(Response.Status.NO_CONTENT);
+        else if (nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
         else
             nametable.put(name,blocks);

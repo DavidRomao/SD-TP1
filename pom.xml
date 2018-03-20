@@ -5,6 +5,9 @@
 	<groupId>SD2018-T1</groupId>
 	<artifactId>SD2018-T1</artifactId>
 	<version>0.0.1</version>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target></properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
