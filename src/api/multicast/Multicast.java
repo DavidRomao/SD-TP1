@@ -7,14 +7,18 @@ public class Multicast {
 
     private final String ip;
     private final int port;
+    private static final URI defaultURI = URI.create("http://225.100.100.100:8080");
+
+    public Multicast() {
+        this.ip = defaultURI.getHost();
+        this.port = defaultURI.getPort();
+    }
+
 
     public Multicast(URI uri) {
         this.ip = uri.getHost();
         this.port = uri.getPort();
-        System.out.println("ip = " + ip);
-        System.out.println("port = " + port);
     }
-
         
 
     public void receive(String answer, String expected) throws UnknownHostException {
@@ -31,10 +35,11 @@ public class Multicast {
                 byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
                 DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
                 socket.receive( request );
-                System.out.write( request.getData(), 0, request.getLength() ) ;
+//                System.out.write( request.getData(), 0, request.getLength() ) ;
 
                 //prepare and send reply... (unicast)
-                if (new String(request.getData(),0,request.getLength()).equals(expected)) {
+                String requestS = new String(request.getData(),0,request.getLength());
+                if (requestS.equalsIgnoreCase(expected)) {
                     System.out.println("Message received");
                     byte[] data = answer.getBytes();
                     DatagramPacket response = new DatagramPacket(data, data.length);
@@ -65,7 +70,7 @@ public class Multicast {
             DatagramPacket packet = new DatagramPacket(new byte[1024],1024);
             socket.receive(packet);
             reply=new String( packet.getData(),0,packet.getLength() );
-        } catch (IOException e) {
+        }catch (IOException e) {
             e.printStackTrace();
         }
         return reply;
