@@ -9,6 +9,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,10 @@ import java.util.Map;
 public class NamenodeServer implements Namenode {
     public static final String NAMENODE = "namenode";
     private Map<String,List<String>> nametable;
+
+    public NamenodeServer() {
+        this.nametable = new HashMap<>(1000);
+    }
 
     @Override
     public List<String> list(String prefix) {
@@ -43,6 +48,7 @@ public class NamenodeServer implements Namenode {
 
     @Override
     public void create(String name, List<String> blocks) {
+        System.out.println("NamenodeServer.create");
         if (blocks.size()==0)
             throw new WebApplicationException(Response.Status.NO_CONTENT);
         else if (nametable.containsKey(name))
@@ -57,27 +63,35 @@ public class NamenodeServer implements Namenode {
             throw new WebApplicationException(Response.Status.CONFLICT);
         else {
             List<String> put = nametable.put(name, blocks);
-            throw new WebApplicationException(Response.Status.NO_CONTENT);
+//            if (blocks.size() == 0)
+//                throw new WebApplicationException(Response.Status.NO_CONTENT);
             //TODO  ask teacher if 200 OK is never returned
         }
     }
 
     @Override
     public void delete(String prefix) {
-        nametable.keySet().forEach(s->{
-            if (s.startsWith(prefix))
-                nametable.remove(s);
-        });
+        System.out.println("NamenodeServer.delete");
+        int i = 0;
+        String [] toDelete = new String[nametable.size()];
+        for (String s : nametable.keySet()) {
+            if (s.startsWith(prefix)){
+                toDelete[i++]=s;
+            }
+        }
+        for (int j = 0; j < i; j++) {
+            nametable.remove(toDelete[j]);
+        }
+        if (i == 0)throw new WebApplicationException(Response.Status.NOT_FOUND);
+        else throw new WebApplicationException(Response.Status.NO_CONTENT);
     }
 
     public static void main(String[] args) {
-
-
         String URI_BASE;
         try {
             URI_BASE = args[0];
         }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = "http://0.0.0.0:9998/v1/";
+            URI_BASE = "http://localhost:9998/v1";
         }
 
         ResourceConfig config = new ResourceConfig();
@@ -85,7 +99,7 @@ public class NamenodeServer implements Namenode {
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Server ready at .... "+URI_BASE);
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE);
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE+PATH);
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }

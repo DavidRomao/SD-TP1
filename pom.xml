@@ -178,8 +178,13 @@
     <groupId>com.chrylis</groupId>
     <artifactId>base58-codec</artifactId>
 </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.0.0</version>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<dependencyManagement>
 		<dependencies>
