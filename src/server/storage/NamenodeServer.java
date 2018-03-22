@@ -18,7 +18,6 @@ import java.util.Map;
  */
 public class NamenodeServer implements Namenode {
     public static final String NAMENODE = "namenode";
-    public static final URI multicastListener = URI.create("http://225.100.100.100:8080");
     private Map<String,List<String>> nametable;
 
     @Override
@@ -85,8 +84,8 @@ public class NamenodeServer implements Namenode {
         config.register(new NamenodeServer());
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
-        System.err.println("Server ready at ...."+URI_BASE);
-        PingReceiver pingReceiver = new PingReceiver(multicastListener,URI_BASE);
+        System.err.println("Server ready at .... "+URI_BASE);
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE);
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }
@@ -94,9 +93,9 @@ public class NamenodeServer implements Namenode {
         private final Multicast multicast;
         private String answer;
 
-        public PingReceiver(URI uri,String answer) {
+        public PingReceiver(String answer) {
 
-            this.multicast = new Multicast(uri);
+            this.multicast = new Multicast();
             this.answer = answer;
         }
 
@@ -104,7 +103,7 @@ public class NamenodeServer implements Namenode {
         public void run() {
             while (true){
                 try {
-                    multicast.receive(NAMENODE,answer);
+                    multicast.receive(answer,NAMENODE);
                 } catch (UnknownHostException e) {
                     System.err.println("Multicast ip not found.");
                 }
