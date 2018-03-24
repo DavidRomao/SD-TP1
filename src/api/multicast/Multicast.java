@@ -40,14 +40,16 @@ public class Multicast {
                 //prepare and send reply... (unicast)
                 String requestS = new String(request.getData(),0,request.getLength());
                 if (requestS.equalsIgnoreCase(expected)) {
-                    System.out.println("Message received");
+//                    System.out.println("Message received");
                     byte[] data = answer.getBytes();
                     DatagramPacket response = new DatagramPacket(data, data.length);
                     response.setAddress(request.getAddress());
                     response.setPort(request.getPort());
+                    socket.send(response);
+
+                    System.out.println("Multicast.receive");
                     System.out.println( "Address :" +request.getAddress());
                     System.out.println("Port : " + request.getPort());
-                    socket.send(response);
                 }
 
             }
