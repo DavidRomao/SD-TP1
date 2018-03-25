@@ -1,7 +1,10 @@
-/target/
-.classpath
-.project
-SD2018-T1.userlibraries
+target/
+.git/
+.settings/
 doc-1.txt
 doc-2.txt
-/.settings/
+README.md
+WordCount.java
+.classpath
+.gitignore
+.project
