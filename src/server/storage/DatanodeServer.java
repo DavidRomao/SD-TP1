@@ -1,15 +1,15 @@
 package server.storage;
 
-import java.io.*;
-import java.net.URI;
-
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
-
 import api.storage.Datanode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import utils.Base58;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.Status;
+import java.io.*;
+import java.net.URI;
+
 
 public class DatanodeServer implements Datanode {
 	
@@ -68,7 +68,7 @@ public class DatanodeServer implements Datanode {
 		config.register(new DatanodeServer());
 
 		JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
-		System.err.println("Server ready....");
+		System.err.println("Server ready at ...."+URI_BASE);
 	}
 	
 	
