@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.google.gson.Gson;
+
+import api.multicast.Multicast;
 import api.storage.Datanode;
 import utils.Random;
 
@@ -19,6 +22,13 @@ public class DatanodeClient implements Datanode {
 
 	private static final int INITIAL_SIZE = 32;
 	private Map<String, byte[]> blocks = new HashMap<>(INITIAL_SIZE);
+	private Gson gson;
+	Multicast multicast;
+	
+	public DatanodeClient() {
+		 multicast = new Multicast();
+		 gson  = new Gson();
+	}
 	
 	@Override
 	public String createBlock(byte[] data) {
