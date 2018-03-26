@@ -1,13 +1,11 @@
 package sys.storage.io;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import api.storage.BlobStorage.BlobReader;
 import api.storage.Datanode;
 import api.storage.Namenode;
+
+import java.net.URI;
+import java.util.*;
 
 /*
  * 
@@ -21,16 +19,16 @@ public class BufferedBlobReader implements BlobReader {
 
 	final String name;
 	final Namenode namenode; 
-	final Datanode datanode;
+	final Map<String, Datanode> datanodes;
 	
 	final Iterator<String> blocks;
 
 	final LazyBlockReader lazyBlockIterator;
 	
-	public BufferedBlobReader( String name, Namenode namenode, Datanode datanode ) {
+	public BufferedBlobReader( String name, Namenode namenode, Map<String,Datanode> datanodes) {
 		this.name = name;
 		this.namenode = namenode;
-		this.datanode = datanode;
+		this.datanodes = datanodes;
 		
 		this.blocks = this.namenode.read( name ).iterator();
 		this.lazyBlockIterator = new LazyBlockReader();
@@ -54,7 +52,9 @@ public class BufferedBlobReader implements BlobReader {
 	} 
 
 	private List<String> fetchBlockLines(String block) {
-		byte[] data = datanode.readBlock( block );
+		URI uri = URI.create(block);
+		Datanode datanode = datanodes.get(uri.getHost());
+		byte[] data = datanode.readBlock(uri.getPath().split("/")[2]);
 		return Arrays.asList( new String(data).split("\\R"));
 	}
 	

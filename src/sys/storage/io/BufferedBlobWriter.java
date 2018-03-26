@@ -1,13 +1,12 @@
 package sys.storage.io;
 
-import java.io.ByteArrayOutputStream;
-import java.util.LinkedList;
-import java.util.List;
-
 import api.storage.BlobStorage.BlobWriter;
 import api.storage.Datanode;
 import api.storage.Namenode;
 import utils.IO;
+
+import java.io.ByteArrayOutputStream;
+import java.util.*;
 
 /*
  * 
@@ -23,23 +22,40 @@ public class BufferedBlobWriter implements BlobWriter {
 	final ByteArrayOutputStream buf;
 
 	final Namenode namenode; 
-	final Datanode[] datanodes;
+	final Map<String, Datanode> datanodes;
+	private Datanode currentDatanode;
 	final List<String> blocks = new LinkedList<>();
-	
-	public BufferedBlobWriter(String name, Namenode namenode, Datanode[] datanodes, int blockSize ) {
+	private Iterator<String> keyIterator;
+	private final Set<String> keys;
+	public BufferedBlobWriter(String name, Namenode namenode, Map<String,Datanode> datanodes, int blockSize ) {
 		this.name = name;
 		this.namenode = namenode;
 		this.datanodes = datanodes;
-
+		this.keys = datanodes.keySet();
+		this.keyIterator = keys.iterator();
 		this.blockSize = blockSize;
 		this.buf = new ByteArrayOutputStream( blockSize );
 	}
 
+	private Datanode getNextDatanode(){
+		String key;
+		if (keyIterator.hasNext())
+			key= keyIterator.next();
+		else {
+			keyIterator = keys.iterator();
+			key= keyIterator.next();
+		}
+		currentDatanode = datanodes.get(key);
+		return currentDatanode;
+	}
+
 	private void flush( byte[] data, boolean eob ) {
-		blocks.add( datanodes[0].createBlock(data)  );
+
+		blocks.add( currentDatanode.createBlock(data)  );
 		if( eob ) {
 			namenode.create(name, blocks);
 			blocks.clear();
+			getNextDatanode();
 		}
 	}
 
