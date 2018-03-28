@@ -6,9 +6,11 @@ public class PingReceiver implements Runnable{
 	
 	private final Multicast multicast;
 	private String answer;
-	
-	public PingReceiver(String answer) {
-		
+	private String expected;
+
+	public PingReceiver(String answer,String expected) {
+		this.expected = expected;
+
 		this.multicast = new Multicast();
 	    this.answer = answer;
 	}
@@ -17,7 +19,7 @@ public class PingReceiver implements Runnable{
 	public void run() {
 		while (true){
 			try {
-				multicast.receive(answer,"datanode");
+				multicast.receive(answer,expected);
 				} catch (UnknownHostException e) {
 					System.err.println("Multicast ip not found.");
 				}

@@ -1,16 +1,11 @@
 package server.storage;
 
-import api.multicast.Multicast;
 import api.storage.Datanode;
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
 import utils.Base58;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
-import java.net.URI;
-import java.net.UnknownHostException;
 
 
 public class DatanodeServer implements Datanode {
@@ -56,24 +51,7 @@ public class DatanodeServer implements Datanode {
 
 	}
 
-	public static void main(String[] args) {
 
-
-		String URI_BASE;
-		try {
-			URI_BASE = args[0];
-		}catch ( ArrayIndexOutOfBoundsException e){
-			URI_BASE = "http://0.0.0.0:9999/v1/";
-		}
-
-		ResourceConfig config = new ResourceConfig();
-		config.register(new DatanodeServer());
-
-		JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
-		System.err.println("Server ready at ...."+URI_BASE);
-		
-		
-	}
 	
 }
 

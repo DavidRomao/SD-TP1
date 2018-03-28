@@ -1,15 +1,9 @@
 package server.storage;
 
-import api.multicast.Multicast;
-import api.multicast.PingReceiver;
 import api.storage.Namenode;
-import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
-import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -87,22 +81,6 @@ public class NamenodeServer implements Namenode {
         else throw new WebApplicationException(Response.Status.NO_CONTENT);
     }
 
-    public static void main(String[] args) {
-        String URI_BASE;
-        try {
-            URI_BASE = args[0];
-        }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = "http://localhost:9998/v1";
-        }
 
-        ResourceConfig config = new ResourceConfig();
-        config.register(new NamenodeServer());
-
-        JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
-        System.err.println("Server ready at .... "+URI_BASE);
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+PATH);
-        Thread thread = new Thread( pingReceiver);
-        thread.run();
-    }
     
 }
