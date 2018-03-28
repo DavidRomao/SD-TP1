@@ -1,6 +1,7 @@
 package server.storage;
 
 import api.multicast.Multicast;
+import api.multicast.PingReceiver;
 import api.storage.Namenode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -103,26 +104,5 @@ public class NamenodeServer implements Namenode {
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }
-    private static class PingReceiver implements Runnable{
-        private final Multicast multicast;
-        private String answer;
-
-        public PingReceiver(String answer) {
-
-            this.multicast = new Multicast();
-            this.answer = answer;
-        }
-
-        @Override
-        public void run() {
-            while (true){
-                try {
-                    multicast.receive(answer,NAMENODE);
-                } catch (UnknownHostException e) {
-                    System.err.println("Multicast ip not found.");
-                }
-            }
-
-        }
-    }
+    
 }
