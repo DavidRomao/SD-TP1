@@ -9,17 +9,12 @@ import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.logging.Logger;
 
 /*
- * Fake NamenodeClient client.
- * 
- * Rather than invoking the Namenode via REST, executes
- * operations locally, in memory.
- * 
- * Uses a trie to perform efficient prefix query operations.
+ *
+ * Namenode via REST
  */
 public class NamenodeClient implements Namenode {
 
@@ -33,19 +28,14 @@ public class NamenodeClient implements Namenode {
 	public NamenodeClient() {
         Multicast multicast= new Multicast();
         gson  = new Gson();
-        try {
-            String namenodeURI = multicast.send(NAMENODE.getBytes());
-            System.err.println("Namenode server uri : " + namenodeURI);
-            Client client = ClientBuilder.newClient(new ClientConfig());
-            target = client.target(UriBuilder.fromUri(namenodeURI));
-
-        } catch (UnknownHostException e) {
-//            System.err.println("Could not send multicast packet to discover server address");
-            logger.severe("Could not send multicast packet to discover server address");
-        }
+        String namenodeURI = multicast.send(NAMENODE.getBytes(),1000).get(0);
+        System.err.println("Namenode server uri : " + namenodeURI);
+        Client client = ClientBuilder.newClient(new ClientConfig());
+        target = client.target(UriBuilder.fromUri(namenodeURI));
     }
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public List<String> list(String prefix) {
 	    //todo find out how query params work
         Invocation.Builder request = target.path("list/").queryParam("prefix",prefix).request(MediaType.APPLICATION_JSON);

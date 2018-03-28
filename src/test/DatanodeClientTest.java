@@ -1,25 +1,28 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import sys.storage.DatanodeClient;
 
+import java.net.URI;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class DatanodeClientTest {
+
+    public static final java.lang.String STRINGS_FOR_TEST_ARE_ENDLESS = "Strings for test are endless";
 
     @Test
     void createBlock() {
-        DatanodeClient client = new DatanodeClient();
-        byte[] block = "Strings for test are endless".getBytes();
+        DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
+        byte[] block = STRINGS_FOR_TEST_ARE_ENDLESS.getBytes();
         String id = client.createBlock(block);
         System.out.println(id);
-        System.out.println(client.readBlock(id));
-        assertEquals(client.readBlock(id), new String (block, 0, block.length));
-        //client.deleteBlock(id);
-        //sSystem.out.println(client.readBlock());
+        client.deleteBlock(id);
+        byte[] bytes = client.readBlock(id);
+        String string = new String(bytes, 0, STRINGS_FOR_TEST_ARE_ENDLESS.length());
+        System.out.println(string);
+        assertEquals(STRINGS_FOR_TEST_ARE_ENDLESS,string);
+//        System.out.println(client.readBlock());
     }
 /*
     @Test

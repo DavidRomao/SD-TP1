@@ -6,8 +6,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.net.URI;
 
-import static api.storage.Namenode.PATH;
-
 /**
  * @author David Romao 49309
  */
@@ -28,7 +26,7 @@ public class DatanodeServerLauncher {
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+PATH,"datanode");
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE+"datanode","datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }

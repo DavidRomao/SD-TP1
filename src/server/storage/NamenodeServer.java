@@ -22,8 +22,12 @@ public class NamenodeServer implements Namenode {
 
     @Override
     public List<String> list(String prefix) {
+        System.err.println("Collecting blobs with prefix : " + prefix);
         List<String> names = new LinkedList<>();
-        nametable.keySet().forEach(
+        if (prefix.equals(""))
+            names.addAll(nametable.keySet());
+        else
+            nametable.keySet().forEach(
                 s->{
                     if(s.startsWith(prefix)) {
                         names.add(s);

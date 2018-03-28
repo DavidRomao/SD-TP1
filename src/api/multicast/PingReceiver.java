@@ -9,6 +9,7 @@ public class PingReceiver implements Runnable{
 	private String expected;
 
 	public PingReceiver(String answer,String expected) {
+		System.out.println("expected = " + answer);
 		this.expected = expected;
 
 		this.multicast = new Multicast();
@@ -17,12 +18,10 @@ public class PingReceiver implements Runnable{
 	
 	@Override
 	public void run() {
-		while (true){
 			try {
 				multicast.receive(answer,expected);
 				} catch (UnknownHostException e) {
 					System.err.println("Multicast ip not found.");
 				}
-	    }
-	}
+			}
 }

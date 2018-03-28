@@ -7,7 +7,7 @@ import java.net.URI;
  */
 public class URItest {
     public static void main(String[] args) {
-        URI uri = URI.create("http://192.168.1.15:8888/datanode/1234567");
+        URI uri = URI.create("http://0.0.0.0:9999/v1/datanode");
         String host = uri.getHost();
         String path = uri.getPath();
         String id = uri.getPath().split("/")[2];

@@ -1,5 +1,6 @@
 package sys.storage;
 
+import api.multicast.Multicast;
 import api.storage.Datanode;
 import api.storage.Namenode;
 import sys.storage.io.BufferedBlobReader;
@@ -24,6 +25,18 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     public BlobStorageClient() {
         namenode = new NamenodeClient();
         datanodes = new HashMap<>();
+        discover(); // discover namenode servers
+    }
+
+    private void discover(){
+        Multicast multicast = new Multicast();
+        List<String> send = multicast.send("datanode".getBytes(), 500);
+        for (String s : send) {
+            System.err.println(s);
+            URI uri = URI.create(s);
+            datanodes.put(uri.getHost(),new DatanodeClient(uri));
+        }
+//        http://0.0.0.0:9999/v1/datanode
     }
 
     @Override

@@ -60,24 +60,25 @@ public class Multicast {
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
-    public List<String> send(byte[] data,int timeout) throws UnknownHostException {
-        final InetAddress group = InetAddress.getByName( this.ip) ;
-        if( ! group.isMulticastAddress()) {
-            System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
-        }
+    public List<String> send(byte[] data,int timeout)  {
+
         List<String> replies = new LinkedList<>();
         try(MulticastSocket socket = new MulticastSocket()) {
+            final InetAddress group = InetAddress.getByName( this.ip) ;
+            if( ! group.isMulticastAddress()) {
+                System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
+            }
             DatagramPacket request = new DatagramPacket( data, data.length, group, port ) ;
             socket.send( request ) ;
-            System.out.println("Multicast sent");
+//            System.out.println("Multicast sent");
             socket.setSoTimeout(timeout);
             while (true){
                 DatagramPacket datagram= new DatagramPacket(new byte[1024],1024);
                 socket.receive(datagram);
-                replies.add(new String(datagram.getData()));
+                replies.add(new String(datagram.getData() , 0 ,datagram.getLength()));
             }
         }catch (SocketTimeoutException e){
-            System.out.println("All replies received");
+//            System.out.println("All replies received");
         } catch(IOException e) {
             e.printStackTrace();
         }

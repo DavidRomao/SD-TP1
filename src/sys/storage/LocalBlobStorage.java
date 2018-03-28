@@ -14,7 +14,7 @@ public class LocalBlobStorage implements BlobStorage {
 
 	public LocalBlobStorage() {
 		this.namenode = new NamenodeClient();
-		this.datanodes = new Datanode[] { new DatanodeClient() };
+//		this.datanodes = new Datanode[] { new DatanodeClient() };
 	}
 
 	@Override

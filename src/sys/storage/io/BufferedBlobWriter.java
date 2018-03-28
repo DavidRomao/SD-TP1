@@ -22,7 +22,7 @@ public class BufferedBlobWriter implements BlobWriter {
 	final ByteArrayOutputStream buf;
 
 	final Namenode namenode; 
-	final Map<String, Datanode> datanodes;
+	private final Map<String, Datanode> datanodes;
 	private Datanode currentDatanode;
 	final List<String> blocks = new LinkedList<>();
 	private Iterator<String> keyIterator;
