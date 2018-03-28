@@ -2,20 +2,21 @@ package api.multicast;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Multicast {
 
     private final String ip;
     private final int port;
     private static final URI defaultURI = URI.create("http://225.100.100.100:8080");
-
     public Multicast() {
         this.ip = defaultURI.getHost();
         this.port = defaultURI.getPort();
     }
 
 
-    public Multicast(URI uri) {
+    public Multicast(URI uri, int timeout) {
         this.ip = uri.getHost();
         this.port = uri.getPort();
     }
@@ -58,23 +59,28 @@ public class Multicast {
         }
     }
 
-    public String send(byte[] data) throws UnknownHostException {
+    @SuppressWarnings("InfiniteLoopStatement")
+    public List<String> send(byte[] data,int timeout) throws UnknownHostException {
         final InetAddress group = InetAddress.getByName( this.ip) ;
-        String reply="";
         if( ! group.isMulticastAddress()) {
             System.out.println( "Not a multicast address (use range : 224.0.0.0 -- 239.255.255.255)");
         }
-
+        List<String> replies = new LinkedList<>();
         try(MulticastSocket socket = new MulticastSocket()) {
             DatagramPacket request = new DatagramPacket( data, data.length, group, port ) ;
             socket.send( request ) ;
-            // receive reply (unicast)
-            DatagramPacket packet = new DatagramPacket(new byte[1024],1024);
-            socket.receive(packet);
-            reply=new String( packet.getData(),0,packet.getLength() );
-        }catch (IOException e) {
+            System.out.println("Multicast sent");
+            socket.setSoTimeout(timeout);
+            while (true){
+                DatagramPacket datagram= new DatagramPacket(new byte[1024],1024);
+                socket.receive(datagram);
+                replies.add(new String(datagram.getData()));
+            }
+        }catch (SocketTimeoutException e){
+            System.out.println("All replies received");
+        } catch(IOException e) {
             e.printStackTrace();
         }
-        return reply;
+        return replies;
     }
 }
