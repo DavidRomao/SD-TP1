@@ -1,5 +1,6 @@
 package server.storage;
 
+import api.multicast.Multicast;
 import api.storage.Datanode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -9,6 +10,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.URI;
+import java.net.UnknownHostException;
 
 
 public class DatanodeServer implements Datanode {
@@ -26,7 +28,7 @@ public class DatanodeServer implements Datanode {
 			System.err.println("Internal Error!");
 			return null;
 		}
-
+		
 	}
 
 	@Override
@@ -69,7 +71,10 @@ public class DatanodeServer implements Datanode {
 
 		JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
 		System.err.println("Server ready at ...."+URI_BASE);
+		
+		
 	}
 	
-	
 }
+
+
