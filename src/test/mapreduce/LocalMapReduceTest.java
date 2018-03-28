@@ -1,20 +1,20 @@
 package test.mapreduce;
 
-import java.io.File;
-import java.nio.file.Files;
-
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
 import sys.mapreduce.MapReduceEngine;
 import sys.storage.LocalBlobStorage;
 import utils.Random;
 
+import java.io.File;
+import java.nio.file.Files;
+
 public class LocalMapReduceTest {		
 		
 		private static final int MAX_PARTITION_SIZE = 6;
 
 		/*
-		 * Executes a MapReduce computation using the BlobStorage implementation.
+		 * Executes a MapReduce computation using the BlobStorageClient implementation.
 		 * 
 		 * It should be possible to run computation just by replacing the LocalBlobStorage implementation with your own (backed by the servers).
 		 * 

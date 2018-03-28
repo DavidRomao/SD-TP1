@@ -46,7 +46,7 @@ public class DatanodeServer implements Datanode {
 			File file = new File(block);
 			InputStream in = new FileInputStream(file);
 			byte[] blob= new byte[(int)file.length()];
-			in.read(blob, 0, (int) file.length());
+			in.read(blob);
 			return blob;
 		}catch(IOException e) {
 			throw new WebApplicationException( Status.NOT_FOUND );

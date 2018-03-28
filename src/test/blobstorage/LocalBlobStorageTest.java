@@ -1,18 +1,18 @@
 package test.blobstorage;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.List;
-
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobReader;
 import api.storage.BlobStorage.BlobWriter;
 import sys.storage.LocalBlobStorage;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.List;
+
 public class LocalBlobStorageTest {		
 		
 		/*
-		 * Exemplifies the use of BlobStorage by Applications (such as the MapReduce engine)
+		 * Exemplifies the use of BlobStorageClient by Applications (such as the MapReduce engine)
 		 * 
 		 */
 		public static void main(String[] args) throws Exception {

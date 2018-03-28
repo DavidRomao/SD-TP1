@@ -1,12 +1,10 @@
 package sys.storage;
 
-import java.util.List;
-
 import api.storage.BlobStorage;
 import api.storage.Datanode;
 import api.storage.Namenode;
-import sys.storage.io.BufferedBlobReader;
-import sys.storage.io.BufferedBlobWriter;
+
+import java.util.List;
 
 public class LocalBlobStorage implements BlobStorage {
 	private static final int BLOCK_SIZE=512;
@@ -36,11 +34,13 @@ public class LocalBlobStorage implements BlobStorage {
 
 	@Override
 	public BlobReader readBlob(String name) {
-		return new BufferedBlobReader( name, namenode, datanodes[0]);
+//		return new BufferedBlobReader( name, namenode, datanodes[0]);
+		return null;
 	}
 
 	@Override
 	public BlobWriter blobWriter(String name) {
-		return new BufferedBlobWriter( name, namenode, datanodes, BLOCK_SIZE);
+//		return new BufferedBlobWriter( name, namenode, datanodes, BLOCK_SIZE);
+		return null;
 	}
 }
