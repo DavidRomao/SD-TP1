@@ -50,13 +50,17 @@ public class BlobStorageClient implements api.storage.BlobStorage{
         List<String> docs = namenode.list(prefix);
         // http://localhost:8888/v1/id
         for (String doc : docs) {
-            URI uri = URI.create(doc);
-            String host = uri.getHost();
-            Datanode datanode = datanodes.get(host);
-            String id = uri.getPath().split("/")[2];
-            datanode.deleteBlock(id);
-        }
+            List<String> blocks = namenode.read(doc);
+            blocks.forEach( s-> {
+                URI uri = URI.create(s);
+                String host = uri.getHost();
+                Datanode datanode = datanodes.get(host);
+                String id = uri.getPath().split("/")[3];
+                datanode.deleteBlock(id);
 
+            });
+        }
+        namenode.delete(prefix);
     }
 
     @Override

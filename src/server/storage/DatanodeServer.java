@@ -9,7 +9,13 @@ import java.io.*;
 
 
 public class DatanodeServer implements Datanode {
-	
+
+	private String base_uri;
+
+	public DatanodeServer(String base_uri) {
+		this.base_uri = base_uri;
+	}
+
 	@Override
 	public String createBlock(byte[] data){
 		try {
@@ -18,7 +24,10 @@ public class DatanodeServer implements Datanode {
 			OutputStream out = new FileOutputStream(blob);
 			out.write(data);
 			out.close();
-			return id;
+
+			System.out.println("block created : " + base_uri +"/"+id);
+			return base_uri + "/" + id;
+      
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");
@@ -29,9 +38,12 @@ public class DatanodeServer implements Datanode {
 
 	@Override
 	public void deleteBlock(String block) {
+		System.out.println("DatanodeServer.deleteBlock");
+		System.out.println("block = " + block);
 		File file = new File(block);
 		if(file.exists()) {
-			file.delete();
+			boolean delete = file.delete();
+			assert delete;
 		}else {
 			throw new WebApplicationException( Status.NOT_FOUND);
 		}
@@ -41,7 +53,10 @@ public class DatanodeServer implements Datanode {
 	@Override
 	public byte[] readBlock(String block) {
 		try{
+			System.out.println("DatanodeServer.readBlock");
+			System.out.println("block = " + block);
 			File file = new File(block);
+			assert file.exists();
 			InputStream in = new FileInputStream(file);
 			byte[] blob= new byte[(int)file.length()];
 			in.read(blob);

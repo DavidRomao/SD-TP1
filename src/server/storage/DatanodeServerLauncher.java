@@ -1,6 +1,7 @@
 package server.storage;
 
 import api.multicast.PingReceiver;
+import api.storage.Datanode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -18,15 +19,15 @@ public class DatanodeServerLauncher {
         try {
             URI_BASE = args[0];
         }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = "http://0.0.0.0:9999/v1/";
+            URI_BASE = "http://0.0.0.0:9999/v1";
         }
         ResourceConfig config = new ResourceConfig();
-        config.register(new DatanodeServer());
+        config.register(new DatanodeServer(URI_BASE+ Datanode.PATH) ) ;
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+"datanode","datanode");
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }

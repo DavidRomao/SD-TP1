@@ -1,9 +1,13 @@
 package test;
 
+import api.storage.Datanode;
 import org.junit.jupiter.api.Test;
 import sys.storage.DatanodeClient;
+import sys.storage.NamenodeClient;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,17 +28,20 @@ public class DatanodeClientTest {
         assertEquals(STRINGS_FOR_TEST_ARE_ENDLESS,string);
 //        System.out.println(client.readBlock());
     }
-/*
+
     @Test
-    void deleteBlock() {
-        NamenodeClient client = new NamenodeClient();
+    void deleteBlock() throws InterruptedException {
+        Datanode client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
         List<String> blocks = new ArrayList<>(100);
         for (int i = 0; i < 100; i++) {
             blocks.add("Strings for test are endless");
         }
-//        client.create("endless",blocks);
-
-        client.delete("endless");
+        String id = client.createBlock("hello It is working".getBytes());
+        System.out.println(id);
+//        client.deleteBlock(id);
+//        System.out.println();
+//        Thread.sleep(1000);
+//        System.out.println("Read result " +  new String(client.readBlock(id)));
 //        client.delete("endless");
     }
 
@@ -54,5 +61,5 @@ public class DatanodeClientTest {
         List<String> endless = client.read("endless");
         assertEquals(endless,blocks2);
     }
-*/
+
 }
