@@ -24,8 +24,10 @@ public class DatanodeServer implements Datanode {
 			OutputStream out = new FileOutputStream(blob);
 			out.write(data);
 			out.close();
+
 			System.out.println("block created : " + base_uri +"/"+id);
 			return base_uri + "/" + id;
+      
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");
