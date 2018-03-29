@@ -17,6 +17,7 @@ public class DatanodeServer implements Datanode {
 			File blob = new File(id);
 			OutputStream out = new FileOutputStream(blob);
 			out.write(data);
+			out.close();
 			return id;
 		}catch(IOException e) {
 			// never happens, the block is always created
@@ -44,6 +45,7 @@ public class DatanodeServer implements Datanode {
 			InputStream in = new FileInputStream(file);
 			byte[] blob= new byte[(int)file.length()];
 			in.read(blob);
+			in.close();
 			return blob;
 		}catch(IOException e) {
 			throw new WebApplicationException( Status.NOT_FOUND );
