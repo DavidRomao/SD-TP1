@@ -36,12 +36,12 @@ public class Multicast {
                 byte[] buffer = new byte[MAX_DATAGRAM_SIZE] ;
                 DatagramPacket request = new DatagramPacket( buffer, buffer.length ) ;
                 socket.receive( request );
-//                System.out.write( request.getData(), 0, request.getLength() ) ;
-
+                //System.out.write( request.getData(), 0, request.getLength() ) ;
+                
                 //prepare and send reply... (unicast)
                 String requestS = new String(request.getData(),0,request.getLength());
                 if (requestS.equalsIgnoreCase(expected)) {
-//                    System.out.println("Message received");
+                	//System.out.println("Message received");
                     byte[] data = answer.getBytes();
                     DatagramPacket response = new DatagramPacket(data, data.length);
                     response.setAddress(request.getAddress());
