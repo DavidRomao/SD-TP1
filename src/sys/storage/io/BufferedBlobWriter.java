@@ -27,6 +27,7 @@ public class BufferedBlobWriter implements BlobWriter {
 	final List<String> blocks = new LinkedList<>();
 	private Iterator<String> keyIterator;
 	private final Set<String> keys;
+	
 	public BufferedBlobWriter(String name, Namenode namenode, Map<String,Datanode> datanodes, int blockSize ) {
 		this.name = name;
 		this.namenode = namenode;
@@ -35,6 +36,7 @@ public class BufferedBlobWriter implements BlobWriter {
 		this.keyIterator = keys.iterator();
 		this.blockSize = blockSize;
 		this.buf = new ByteArrayOutputStream( blockSize );
+		currentDatanode = getNextDatanode();
 	}
 
 	private Datanode getNextDatanode(){
@@ -50,7 +52,6 @@ public class BufferedBlobWriter implements BlobWriter {
 	}
 
 	private void flush( byte[] data, boolean eob ) {
-
 		blocks.add( currentDatanode.createBlock(data)  );
 		if( eob ) {
 			namenode.create(name, blocks);
@@ -72,5 +73,6 @@ public class BufferedBlobWriter implements BlobWriter {
 	@Override
 	public void close() {
 		flush( buf.toByteArray(), true );
+		//TODO nao temos de fazer buf.reset(); ?
 	}
 }

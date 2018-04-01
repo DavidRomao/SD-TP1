@@ -1,5 +1,6 @@
 package test.blobstorage;
 
+import api.storage.BlobStorage.BlobReader;
 import api.storage.BlobStorage.BlobWriter;
 import sys.storage.BlobStorageClient;
 
@@ -20,7 +21,9 @@ public class BlobStorageClientTest {
         for (String s : doc) {
             System.out.println(s);
         }
-
+        BlobReader reader = blobstorage.readBlob("doc1.txt");
+		for( String line : reader )
+			System.out.println( line  );
 
     }
 }
