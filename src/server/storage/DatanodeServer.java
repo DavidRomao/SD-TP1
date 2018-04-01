@@ -1,11 +1,11 @@
 package server.storage;
 
 import api.storage.Datanode;
+import utils.Random;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
-import java.util.Arrays;
 
 
 public class DatanodeServer implements Datanode {
@@ -19,7 +19,7 @@ public class DatanodeServer implements Datanode {
 	@Override
 	public String createBlock(byte[] data){
 		try {
-			String id = Arrays.hashCode(data) + "";
+			String id = Random.key64();
 			File blob = new File(id);
 			OutputStream out = new FileOutputStream(blob);
 			out.write(data);
