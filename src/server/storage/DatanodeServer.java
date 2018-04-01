@@ -33,7 +33,6 @@ public class DatanodeServer implements Datanode {
 			System.err.println("Internal Error!");
 			return null;
 		}
-		
 	}
 
 	@Override

@@ -73,6 +73,6 @@ public class NamenodeClient implements Namenode {
 	public List<String> read(String name) {
         WebTarget path = target.path(name);
         byte[] bytes = path.request().get(byte[].class);
-        return  gson.fromJson(new String(bytes), List.class);
+        return gson.fromJson(new String(bytes), List.class);
     }
 }
