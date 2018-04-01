@@ -47,13 +47,15 @@ public class NamenodeServer implements Namenode {
 
     @Override
     public void create(String name, List<String> blocks) {
-        System.out.println("NamenodeServer.create");
+        System.err.println("NamenodeServer.create");
         if (blocks.size()==0)
             throw new WebApplicationException(Response.Status.NO_CONTENT);
         else if (nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
         else
             nametable.put(name,blocks);
+        System.err.println("Blocks list size " + blocks.size());
+        blocks.forEach(System.err::println);
     }
 
     @Override

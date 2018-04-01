@@ -3,8 +3,6 @@ package test;
 import sys.storage.DatanodeClient;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DatanodeClientTest {
 

@@ -1,10 +1,8 @@
 package test.blobstorage;
 
 import api.storage.BlobStorage;
-import api.storage.BlobStorage.BlobReader;
 import api.storage.BlobStorage.BlobWriter;
 import sys.storage.BlobStorageClient;
-import sys.storage.LocalBlobStorage;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -19,9 +17,8 @@ public class LocalBlobStorageTest {
 		public static void main(String[] args) throws Exception {
 
 			//1. Get an implementation of the storage. LocalBlobStorage implements everything locally, in memory, sadly...
-			//BlobStorage storage = new LocalBlobStorage();
 			BlobStorage storage = new BlobStorageClient();
-			
+
 			//2. We can list ALL the blobs already stored in the storage, using "" as the name prefix.
 			List<String> blobs = storage.listBlobs("");
 			
@@ -35,11 +32,7 @@ public class LocalBlobStorageTest {
 			//4. Listing again, should return 1 and only blob.
 			assert storage.listBlobs("").size() == 1;
 
-			//5. Read the contents of the blob to the standard output.
-			BlobReader reader = storage.readBlob("1-line-blob");
-			for( String line : reader )
-				System.out.println( line  );
-			
+
 			//6. Read the contents of the blob to the standard output, Java 8+ way.
 			storage.readBlob("1-line-blob").forEach( System.out::println );
 			

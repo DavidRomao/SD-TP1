@@ -21,13 +21,13 @@ public class BufferedBlobWriter implements BlobWriter {
 	final int blockSize;
 	final ByteArrayOutputStream buf;
 
-	final Namenode namenode; 
+	private final Namenode namenode;
 	private final Map<String, Datanode> datanodes;
 	private Datanode currentDatanode;
 	final List<String> blocks = new LinkedList<>();
 	private Iterator<String> keyIterator;
 	private final Set<String> keys;
-	
+
 	public BufferedBlobWriter(String name, Namenode namenode, Map<String,Datanode> datanodes, int blockSize ) {
 		this.name = name;
 		this.namenode = namenode;
@@ -36,7 +36,7 @@ public class BufferedBlobWriter implements BlobWriter {
 		this.keyIterator = keys.iterator();
 		this.blockSize = blockSize;
 		this.buf = new ByteArrayOutputStream( blockSize );
-		currentDatanode = getNextDatanode();
+		getNextDatanode();
 	}
 
 	private Datanode getNextDatanode(){

@@ -9,7 +9,6 @@ public class PingReceiver implements Runnable{
 	private String expected;
 
 	public PingReceiver(String answer,String expected) {
-		System.out.println("expected = " + answer);
 		this.expected = expected;
 
 		this.multicast = new Multicast();

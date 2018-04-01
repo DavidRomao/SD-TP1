@@ -29,7 +29,7 @@ public class NamenodeClient implements Namenode {
         Multicast multicast= new Multicast();
         gson  = new Gson();
         String namenodeURI = multicast.send(NAMENODE.getBytes(),1000).get(0);
-        System.err.println("Namenode server uri : " + namenodeURI);
+//        System.err.println("Namenode server uri : " + namenodeURI);
         Client client = ClientBuilder.newClient(new ClientConfig());
         target = client.target(UriBuilder.fromUri(namenodeURI));
     }
@@ -57,16 +57,16 @@ public class NamenodeClient implements Namenode {
 	public void delete(String prefix) {
         WebTarget path = target.path("/list").queryParam("prefix",prefix);
         Response delete = path.request().delete();
-        System.err.println("NamenodeClient.delete");
-        System.err.println("delete.getStatus() = " + delete.getStatus());
+//        System.err.println("NamenodeClient.delete");
+//        System.err.println("delete.getStatus() = " + delete.getStatus());
     }
 
 	@Override
 	public void update(String name, List<String> blocks) {
         WebTarget path = target.path(name);
         Response put = path.request().put(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
-        System.err.println("NamenodeClient.update");
-        System.err.println("put = " + put.getStatus());
+//        System.err.println("NamenodeClient.update");
+//        System.err.println("put = " + put.getStatus());
     }
 
 	@Override

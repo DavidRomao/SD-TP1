@@ -38,21 +38,24 @@ public class DatanodeClient implements Datanode {
 	@Override
 	public String createBlock(byte[] data) {
 		Response response = target.request().post(Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM));
-		System.out.println(response.getStatus());
+//		System.out.println("DatanodeClient.createBlock");
+//		System.out.println(response.getStatus());
 		return response.readEntity(String.class);
 	}
 
 	@Override
 	public void deleteBlock(String block) {
 		Response response = target.path(block).request().delete();
-		System.out.println(response.getStatus());
+//		System.out.println("DatanodeClient.deleteBlock");
+//		System.out.println(response.getStatus());
 	}
 
 	@Override
 	public byte[] readBlock(String block) {
 		Response response = target.path(block).request().get();
 		byte[] content = response.readEntity(byte[].class);
-		System.out.println(response.getStatus());
+//		System.out.println("DatanodeClient.readBlock");
+//		System.out.println(response.getStatus());
 		return content;
 	}
 }
