@@ -1,14 +1,14 @@
 package sys.mapreduce;
 
-import java.util.Iterator;
-import java.util.stream.Collectors;
-
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
 import jersey.repackaged.com.google.common.collect.Iterators;
 import sys.mapreduce.Jobs.JobInstance;
 import utils.Base58;
 import utils.JSON;
+
+import java.util.Iterator;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ReducerTask extends MapReduceTask {

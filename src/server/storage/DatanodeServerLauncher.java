@@ -10,6 +10,7 @@ import java.net.URI;
 /**
  * @author David Romao 49309
  */
+
 public class DatanodeServerLauncher {
 
     public static void main(String[] args) {
@@ -22,11 +23,13 @@ public class DatanodeServerLauncher {
             URI_BASE = "http://0.0.0.0:9999/v1";
         }
         ResourceConfig config = new ResourceConfig();
-        config.register(new DatanodeServer(URI_BASE+ Datanode.PATH) ) ;
+        DatanodeServer datanodeServer = new DatanodeServer(URI_BASE + Datanode.PATH);
+        config.register(datanodeServer) ;
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
+//        Endpoint.publish(URI_BASE+ComputeNode.PATH,datanodeServer);
         PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();

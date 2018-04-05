@@ -1,12 +1,12 @@
 package sys.mapreduce;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
 import utils.Base58;
 import utils.JSON;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MapperTask extends MapReduceTask {

@@ -1,12 +1,12 @@
 package sys.mapreduce;
 
+import api.storage.BlobStorage;
+import utils.Java;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-
-import api.storage.BlobStorage;
-import utils.Java;
 
 /*
  * Convenience class to resolve a blob name, containing a MapReduce program class, into a program instance.

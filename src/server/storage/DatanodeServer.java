@@ -1,14 +1,17 @@
 package server.storage;
 
+import api.mapreduce.ComputeNode;
 import api.storage.Datanode;
 import utils.Random;
 
+import javax.jws.WebService;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 
-
-public class DatanodeServer implements Datanode {
+@WebService(serviceName = ComputeNode.NAME,targetNamespace = ComputeNode.NAMESPACE,
+        endpointInterface = ComputeNode.INTERFACE)
+public class DatanodeServer implements Datanode,ComputeNode {
 
 	private String base_uri;
 
@@ -68,7 +71,20 @@ public class DatanodeServer implements Datanode {
 	}
 
 
-	
+	@Override
+	public void mapper(String jobClassBlob, String inputPrefix, String outputPrefix) {
+
+	}
+
+	@Override
+	public void reducer(String jobClassBlob, String inputPrefix, String outputPrefix) {
+
+	}
+
+	@Override
+	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
+
+	}
 }
 
 
