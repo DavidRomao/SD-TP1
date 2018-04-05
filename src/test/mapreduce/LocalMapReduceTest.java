@@ -3,7 +3,7 @@ package test.mapreduce;
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
 import sys.mapreduce.MapReduceEngine;
-import sys.storage.LocalBlobStorage;
+import sys.storage.BlobStorageClient;
 import utils.Random;
 
 import java.io.File;
@@ -22,7 +22,7 @@ public class LocalMapReduceTest {
 		public static void main(String[] args) throws Exception {
 
 			//1. Get the storage implementation. Replace with your own implementation...
-			BlobStorage storage = new LocalBlobStorage();
+			BlobStorage storage = new BlobStorageClient();
 
 			//2. Copy all lines of WordCount.java to a blob named WordCount.
 			BlobWriter src = storage.blobWriter("WordCount");
