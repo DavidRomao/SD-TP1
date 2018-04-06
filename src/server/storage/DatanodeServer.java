@@ -4,13 +4,11 @@ import api.mapreduce.ComputeNode;
 import api.storage.Datanode;
 import utils.Random;
 
-import javax.jws.WebService;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 
-@WebService(serviceName = ComputeNode.NAME,targetNamespace = ComputeNode.NAMESPACE,
-        endpointInterface = ComputeNode.INTERFACE)
+
 public class DatanodeServer implements Datanode,ComputeNode {
 
 	private String base_uri;
