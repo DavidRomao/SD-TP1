@@ -1,13 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>SD2018-T1</groupId>
 	<artifactId>SD2018-T1</artifactId>
-	<version>0.0.1</version>
-	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target></properties>
+	<version>0.0.1-SNAPSHOT</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -51,27 +46,19 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>smduarte/sd17-t2-base</imageName>
-							<baseImage>openjdk:8</baseImage>
+							<imageName>sd18-tp1-base-49309-66666</imageName>
+							<baseImage>smduarte/sd18-tp1-openjdk8:latest</baseImage>
 							<entryPoint>[]</entryPoint>
 							<resources>
 								<resource>
 									<targetPath>/props</targetPath>
 									<directory>${basedir}</directory>
-									<include>sd2017-t2.props</include>
+									<include>sd2018-tp1.props</include>
 								</resource>
 								<resource>
 									<targetPath>/home/sd</targetPath>
 									<directory>${project.build.directory}/lib</directory>
 									<include>*.jar</include>
-								</resource>
-								<resource>
-									<targetPath>/home/sd/</targetPath>
-									<directory>${basedir}/tls</directory>
-									<include>rendezvous.jks</include>
-									<include>indexer.jks</include>
-									<include>indexer-ts.jks</include>
-									<include>tester.jks</include>
 								</resource>
 							</resources>
 						</configuration>
@@ -83,8 +70,8 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>smduarte/sd17-t2-${user.name}</imageName>
-							<baseImage>smduarte/sd17-t2-base</baseImage>
+							<imageName>sd18-tp1-49309-66666</imageName>
+							<baseImage>sd18-tp1-base-49309-66666</baseImage>
 							<resources>
 								<resource>
 									<targetPath>/home/sd</targetPath>
@@ -94,18 +81,15 @@
 							</resources>
 						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
 		</plugins>
 	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
@@ -160,32 +144,28 @@
 			<groupId>com.sun.xml.ws</groupId>
 			<artifactId>jaxws-rt</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-<dependency>
-    <groupId>org.apache.commons</groupId>
-    <artifactId>commons-collections4</artifactId>
-</dependency>
-<dependency>
-    <groupId>com.chrylis</groupId>
-    <artifactId>base58-codec</artifactId>
-</dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.0.0</version>
-        </dependency>
-
-    </dependencies>
-
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.chrylis</groupId>
+			<artifactId>base58-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.0.0</version>
+		</dependency>
+	</dependencies>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

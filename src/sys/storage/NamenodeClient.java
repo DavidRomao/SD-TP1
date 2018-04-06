@@ -69,10 +69,11 @@ public class NamenodeClient implements Namenode {
 //        System.err.println("put = " + put.getStatus());
     }
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public List<String> read(String name) {
         WebTarget path = target.path(name);
         byte[] bytes = path.request().get(byte[].class);
-        return gson.fromJson(new String(bytes), List.class);
+        return (List<String>) gson.fromJson(new String(bytes), List.class);
     }
 }

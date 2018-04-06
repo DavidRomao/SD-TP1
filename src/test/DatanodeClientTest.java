@@ -1,8 +1,13 @@
 package test;
 
 import sys.storage.DatanodeClient;
+import sys.storage.NamenodeClient;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+//import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DatanodeClientTest {
 
@@ -27,39 +32,15 @@ public class DatanodeClientTest {
 //        assertEquals(STRINGS_FOR_TEST_ARE_ENDLESS,string);
 //        System.out.println(client.readBlock());
     }
-    /*
-    void deleteBlock() throws InterruptedException {
-        Datanode client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
-        List<String> blocks = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
-            blocks.add("Strings for test are endless");
-        }
-        String id = client.createBlock("hello It is working".getBytes());
-        System.out.println(id);
-//        client.deleteBlock(id);
-//        System.out.println();
-//        Thread.sleep(1000);
-//        System.out.println("Read result " +  new String(client.readBlock(id)));
-//        client.delete("endless");
-    }
 
-    void readBlock() {
-        NamenodeClient client = new NamenodeClient();
-        List<String> blocks = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
-            blocks.add("Strings for test are endless");
-        }
-        List<String> blocks2 = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
-            blocks.add("Strings for this test are endless");
-        }
-        client.create("endless",blocks);
-        client.update("endless",blocks2);
-        List<String> endless = client.read("endless");
-        assertEquals(endless,blocks2);
+    private static void read(){
+        DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
+        byte[] block = client.readBlock("e0d7bed7pu");
+        String s = new String(block);
+        System.out.println(s);
     }
-	*/
     public static void main(String[] args) {
-    	createBlock();
+//    	createBlock();
+    	read();
     }
 }
