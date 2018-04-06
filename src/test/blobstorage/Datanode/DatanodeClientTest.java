@@ -1,11 +1,8 @@
-package test;
+package test.blobstorage.Datanode;
 
 import sys.storage.DatanodeClient;
-import sys.storage.NamenodeClient;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 
