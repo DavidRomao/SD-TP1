@@ -20,7 +20,7 @@ public class DatanodeServerLauncher {
         try {
             URI_BASE = args[0];
         }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = "http://0.0.0.0:9999/v1";
+            URI_BASE = "http://0.0.0.0:9999/";
         }
         ResourceConfig config = new ResourceConfig();
         DatanodeServer datanodeServer = new DatanodeServer(URI_BASE + Datanode.PATH);
@@ -29,7 +29,6 @@ public class DatanodeServerLauncher {
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
-//        Endpoint.publish(URI_BASE+ComputeNode.PATH,datanodeServer);
         PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();

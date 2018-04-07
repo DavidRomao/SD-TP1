@@ -55,7 +55,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
                 URI uri = URI.create(s);
                 String host = uri.getHost();
                 Datanode datanode = datanodes.get(host);
-                String id = uri.getPath().split("/")[3];
+                String id = uri.getPath().split("/")[2];
                 datanode.deleteBlock(id);
 
             });

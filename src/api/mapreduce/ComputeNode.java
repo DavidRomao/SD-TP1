@@ -24,12 +24,7 @@ public interface ComputeNode {
         }
     }
     
-    @WebMethod
-    void mapper( String jobClassBlob, String inputPrefix , String outputPrefix );
-    
-    @WebMethod
-    void reducer( String jobClassBlob, String inputPrefix , String outputPrefix );
-    
+
     @WebMethod
     void mapReduce( String jobClassBlob, String inputPrefix , String outputPrefix, int outPartSize ) throws InvalidArgumentException ;
 }

@@ -17,7 +17,7 @@ public class NamenodeServerLauncher {
         try {
             URI_BASE = args[0];
         }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = "http://0.0.0.0:9998/v1";
+            URI_BASE = "http://0.0.0.0:9998/";
         }
 
         ResourceConfig config = new ResourceConfig();
