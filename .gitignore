@@ -2,3 +2,8 @@ target/*
 SD2018-T1.iml
 .idea/*
 Datanode/*
+bin/*
+.settings/
+.classpath
+.project
+/target/
