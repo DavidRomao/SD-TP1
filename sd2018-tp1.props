@@ -1,9 +1,9 @@
-namenode-mainclass=server.storage.NamenodeServerLauncher
+namenode-mainclass=servidor.storage.NamenodeServerLauncher
 namenode-port=9998
-datanode-mainclass=server.storage.DatanodeServerLauncher
+datanode-mainclass=servidor.storage.DatanodeServerLauncher
 datanode-port=9999
-computenode-mainclass=sys.mapreduce.ComputeNodeServer
-computenode-port=6666
+computenode-mainclass=servidor.mapreduce.ComputeNodeServer
+computenode-port=3333
 blobstorage-class=sys.storage.BlobStorageClient
 discovery-multicast-address=225.100.100.100:8080
 datanode-gc-timeout=30

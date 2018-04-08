@@ -20,14 +20,15 @@ public class MapperTask extends MapReduceTask {
 	
 	public void execute() {
 		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
-		
 		job.setYielder( (key,val) -> jsonValueWriterFor( key ).write(val));
 		
-		job.map_init();					
+		job.map_init();
+
 		storage.listBlobs( inputPrefix ).stream()
 			.forEach( blob -> {
 					storage.readBlob( blob ).forEach( line -> job.map( blob, line ) );
 			});
+
 		job.map_end();
 		
 		writers.values().forEach( JsonBlobWriter::close );					

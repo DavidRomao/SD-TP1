@@ -1,23 +1,23 @@
-package server.storage;
+package servidor.storage;
 
 import api.storage.Namenode;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author David Romao 49309
  */
 public class NamenodeServer implements Namenode {
     public static final String NAMENODE = "namenode";
-    private Map<String,List<String>> nametable;
+    private ConcurrentMap<String,List<String>> nametable;
 
     public NamenodeServer() {
-        this.nametable = new HashMap<>(1000);
+        this.nametable = new ConcurrentHashMap<>(1000);
     }
 
     @Override

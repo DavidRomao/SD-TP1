@@ -43,4 +43,9 @@ public class LocalBlobStorage implements BlobStorage {
 //		return new BufferedBlobWriter( name, namenode, datanodes, BLOCK_SIZE);
 		return null;
 	}
+
+	@Override
+	public Namenode getNamenode() {
+		return null;
+	}
 }

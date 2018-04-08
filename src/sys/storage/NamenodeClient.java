@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 /*
@@ -26,12 +27,16 @@ public class NamenodeClient implements Namenode {
 
 	private WebTarget target;
 	public NamenodeClient() {
-        Multicast multicast= new Multicast();
-        gson  = new Gson();
-        String namenodeURI = multicast.send(NAMENODE.getBytes(),1000).get(0);
-//        System.err.println("Namenode server uri : " + namenodeURI);
-        Client client = ClientBuilder.newClient(new ClientConfig());
-        target = client.target(UriBuilder.fromUri(namenodeURI));
+        Multicast multicast = new Multicast();
+        gson = new Gson();
+        try {
+            String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
+            Client client = ClientBuilder.newClient(new ClientConfig());
+            target = client.target(UriBuilder.fromUri(namenodeURI));
+        }catch (NoSuchElementException e){
+            System.err.println("No namenodes available");
+            System.exit(0);
+        }
     }
 
 	@SuppressWarnings("unchecked")

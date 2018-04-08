@@ -53,7 +53,8 @@ public class BufferedBlobReader implements BlobReader {
 
 	private List<String> fetchBlockLines(String block) {
 		URI uri = URI.create(block);
-		Datanode datanode = datanodes.get(uri.getHost());
+		String key = String.format("%s:%s", uri.getHost(), uri.getPort());
+		Datanode datanode = datanodes.get(key);
 		byte[] data = datanode.readBlock(uri.getPath().split("/")[2]);
 		return Arrays.asList( new String(data).split("\\R"));
 	}

@@ -2,6 +2,7 @@ package test.blobstorage.Namenode;
 
 import org.junit.jupiter.api.Test;
 import sys.storage.NamenodeClient;
+import utils.Random;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,28 +25,30 @@ class NamenodeClientTest {
         }
 //        assertEquals(endolas,blocks);
     }
-
+    @Test
     void create_read() {
         NamenodeClient client = new NamenodeClient();
         List<String> blocks = new ArrayList<>(100);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             blocks.add("Strings for test are endless");
         }
-        client.create("endless",blocks);
-        List<String> endless = client.read("endless");
-//        assertEquals(endless,blocks);
+        for (int i = 0; i < 10000; i++) {
+            client.create(Random.key64(),blocks);
+        }
+
+        //        assertEquals(endless,blocks);
     }
 
+    @Test
     void delete() {
         NamenodeClient client = new NamenodeClient();
         List<String> blocks = new ArrayList<>(100);
         for (int i = 0; i < 100; i++) {
             blocks.add("Strings for test are endless");
         }
-//        client.create("endless",blocks);
+        client.create("endless",blocks);
 
-        client.delete("endless");
-//        client.delete("endless");
+        client.delete("endless1");
     }
 
     void update() {

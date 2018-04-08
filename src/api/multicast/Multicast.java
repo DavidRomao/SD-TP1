@@ -2,8 +2,8 @@ package api.multicast;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Multicast {
 
@@ -60,9 +60,9 @@ public class Multicast {
     }
 
     @SuppressWarnings("InfiniteLoopStatement")
-    public List<String> send(byte[] data,int timeout)  {
+    public Set<String> send(byte[] data,int timeout)  {
 
-        List<String> replies = new LinkedList<>();
+        Set<String> replies = new HashSet<>();
         try(MulticastSocket socket = new MulticastSocket()) {
             final InetAddress group = InetAddress.getByName( this.ip) ;
             if( ! group.isMulticastAddress()) {
@@ -71,8 +71,9 @@ public class Multicast {
             DatagramPacket request = new DatagramPacket( data, data.length, group, port ) ;
             socket.send( request ) ;
 //            System.out.println("Multicast sent");
-            socket.setSoTimeout(timeout);
-            while (true){
+            long stopTime = System.currentTimeMillis() + 5000;
+            while (System.currentTimeMillis() < stopTime) {
+                socket.setSoTimeout(timeout);
                 DatagramPacket datagram= new DatagramPacket(new byte[1024],1024);
                 socket.receive(datagram);
                 replies.add(new String(datagram.getData() , 0 ,datagram.getLength()));

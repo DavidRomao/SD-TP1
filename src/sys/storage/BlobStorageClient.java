@@ -10,6 +10,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author David Romao 49309
@@ -19,8 +20,8 @@ public class BlobStorageClient implements api.storage.BlobStorage{
 
     private static final int BLOCK_SIZE=512;
 
-    Namenode namenode;
-    Map<String,Datanode> datanodes;
+    private Namenode namenode;
+    private Map<String,Datanode> datanodes;
 
     public BlobStorageClient() {
         namenode = new NamenodeClient();
@@ -30,11 +31,11 @@ public class BlobStorageClient implements api.storage.BlobStorage{
 
     private void discover(){
         Multicast multicast = new Multicast();
-        List<String> send = multicast.send("datanode".getBytes(), 500);
+        Set<String> send = multicast.send("datanode".getBytes(), 500);
         for (String s : send) {
             System.err.println(s);
             URI uri = URI.create(s);
-            datanodes.put(uri.getHost(),new DatanodeClient(uri));
+            datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri));
         }
 //        http://0.0.0.0:9999/v1/datanode
     }
@@ -54,7 +55,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
             blocks.forEach( s-> {
                 URI uri = URI.create(s);
                 String host = uri.getHost();
-                Datanode datanode = datanodes.get(host);
+                Datanode datanode = datanodes.get(String.format("%s:%s",host,uri.getPort()));
                 String id = uri.getPath().split("/")[2];
                 datanode.deleteBlock(id);
 
@@ -71,5 +72,10 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     @Override
     public BlobWriter blobWriter(String name) {
         return new BufferedBlobWriter(name,namenode,datanodes,BLOCK_SIZE);
+    }
+
+    @Override
+    public Namenode getNamenode() {
+        return namenode;
     }
 }

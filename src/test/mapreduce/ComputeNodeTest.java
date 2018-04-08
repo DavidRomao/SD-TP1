@@ -58,7 +58,7 @@ public class ComputeNodeTest {
         System.out.println(  datanode.getClass() );
 
         //7. Perform the WordCount computation, over the two blobs named "doc-*"
-        //   on the server
+        //   on the servidor
         datanode.mapReduce("WordCount","doc-",outputBlob,MAX_PARTITION_SIZE);
 
         //8. Check the results. The results will be written in one of more partitions of the given maximum size.

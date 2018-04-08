@@ -12,6 +12,8 @@ public interface BlobStorage {
 	
 	BlobWriter blobWriter( String name );
 
+	Namenode getNamenode();
+
 	interface BlobReader extends Iterable<String> {
 		String readLine();
 	}

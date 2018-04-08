@@ -31,10 +31,12 @@ public class DatanodeClientTest {
     }
 
     private static void read(){
-        DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
-        byte[] block = client.readBlock("e0d7bed7pu");
+        DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/datanode"));
+        String block1 = client.createBlock("this is a block data".getBytes());
+        byte[] block = client.readBlock(block1.substring(block1.lastIndexOf("/")+1));
         String s = new String(block);
         System.out.println(s);
+        System.out.println("block1 = " + block1);
     }
     public static void main(String[] args) {
 //    	createBlock();

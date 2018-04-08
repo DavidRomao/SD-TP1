@@ -1,4 +1,4 @@
-package server.storage;
+package servidor.storage;
 
 import api.mapreduce.ComputeNode;
 import api.storage.Datanode;
@@ -65,23 +65,10 @@ public class DatanodeServer implements Datanode,ComputeNode {
 		}catch(IOException e) {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
-
 	}
-
-
-	@Override
-	public void mapper(String jobClassBlob, String inputPrefix, String outputPrefix) {
-
-	}
-
-	@Override
-	public void reducer(String jobClassBlob, String inputPrefix, String outputPrefix) {
-
-	}
-
 	@Override
 	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
-
+		//TODO  implement mapreduce
 	}
 }
 

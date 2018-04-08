@@ -34,7 +34,12 @@ public class DatanodeClient implements Datanode {
 		 Client client = ClientBuilder.newClient(new ClientConfig());
 		 target = client.target(datanodeURI);
 	}
-	
+
+	/**
+	 *
+	 * @param data the block content
+	 * @return the complete block uri
+	 */
 	@Override
 	public String createBlock(byte[] data) {
 		Response response = target.request().post(Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM));
@@ -43,6 +48,10 @@ public class DatanodeClient implements Datanode {
 		return response.readEntity(String.class);
 	}
 
+	/**
+	 *
+	 * @param block the block id, not the uri
+	 */
 	@Override
 	public void deleteBlock(String block) {
 		Response response = target.path(block).request().delete();
@@ -50,6 +59,11 @@ public class DatanodeClient implements Datanode {
 //		System.out.println(response.getStatus());
 	}
 
+	/**
+	 *
+	 * @param block the block id, not the uri
+	 * @return
+	 */
 	@Override
 	public byte[] readBlock(String block) {
 		Response response = target.path(block).request().get();
