@@ -31,13 +31,13 @@ public class BlobStorageClient implements api.storage.BlobStorage{
 
     private void discover(){
         Multicast multicast = new Multicast();
-        Set<String> send = multicast.send("datanode".getBytes(), 500);
+        Set<String> send = multicast.send("Datanode".getBytes(), 500);
         for (String s : send) {
             System.err.println(s);
             URI uri = URI.create(s);
+            System.err.println("Connected to Datanode at : " + s );
             datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri));
         }
-//        http://0.0.0.0:9999/v1/datanode
     }
 
     @Override
@@ -49,7 +49,6 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     @Override
     public void deleteBlobs(String prefix) {
         List<String> docs = namenode.list(prefix);
-        // http://localhost:8888/v1/id
         for (String doc : docs) {
             List<String> blocks = namenode.read(doc);
             blocks.forEach( s-> {

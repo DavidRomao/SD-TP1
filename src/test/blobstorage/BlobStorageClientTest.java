@@ -21,7 +21,7 @@ public class BlobStorageClientTest {
 
     public static void main(String[] args) {
         storage = new BlobStorageClient();
-        testRead();
+        testWrite();
 
     }
 

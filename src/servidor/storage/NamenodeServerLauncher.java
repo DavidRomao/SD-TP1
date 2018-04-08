@@ -28,7 +28,7 @@ public class NamenodeServerLauncher {
 
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Namenode Server ready at .... "+URI_BASE);
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+PATH,"namenode");
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE+PATH,"Namenode");
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }
