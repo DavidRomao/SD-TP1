@@ -74,12 +74,15 @@ public class Multicast {
             long stopTime = System.currentTimeMillis() + 5000;
             while (System.currentTimeMillis() < stopTime) {
                 socket.setSoTimeout(timeout);
-                DatagramPacket datagram= new DatagramPacket(new byte[1024],1024);
-                socket.receive(datagram);
-                replies.add(new String(datagram.getData() , 0 ,datagram.getLength()));
-            }
-        }catch (SocketTimeoutException e){
+                try {
+                    DatagramPacket datagram = new DatagramPacket(new byte[1024], 1024);
+                    socket.receive(datagram);
+                    replies.add(new String(datagram.getData(), 0, datagram.getLength()));
+                }catch (SocketTimeoutException e){
+                    socket.send( request ) ;
 //            System.out.println("All replies received");
+                }
+            }
         } catch(IOException e) {
             e.printStackTrace();
         }
