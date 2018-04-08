@@ -16,11 +16,7 @@ public class Multicast {
     }
 
 
-    public Multicast(URI uri, int timeout) {
-        this.ip = uri.getHost();
-        this.port = uri.getPort();
-    }
-        
+
 
     public void receive(String answer, String expected) throws UnknownHostException {
         final int MAX_DATAGRAM_SIZE = 65536;

@@ -35,7 +35,7 @@ public class DatanodeServerLauncher {
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"datanode");
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"Datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }

@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class NamenodeClient implements Namenode {
 
-    private static final String NAMENODE = "namenode";
+    private static final String NAMENODE = "Namenode";
     private static Logger logger = Logger.getLogger(NamenodeClient.class.toString() );
 	private Gson gson;
 
@@ -32,6 +32,7 @@ public class NamenodeClient implements Namenode {
         try {
             String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
             Client client = ClientBuilder.newClient(new ClientConfig());
+            System.err.println("Connected to namenode at : " +namenodeURI);
             target = client.target(UriBuilder.fromUri(namenodeURI));
         }catch (NoSuchElementException e){
             System.err.println("No namenodes available");
