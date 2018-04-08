@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import static api.storage.Namenode.PATH;
 
 /**
+ * @author Cláudio Pereira 47942
  * @author David Romao 49309
  */
 public class NamenodeServerLauncher {

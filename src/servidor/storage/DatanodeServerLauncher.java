@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 
 /**
+ * @author Cláudio Pereira 47942
  * @author David Romao 49309
  */
 

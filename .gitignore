@@ -7,3 +7,4 @@ bin/*
 .classpath
 .project
 /target/
+testn-sd1.sh

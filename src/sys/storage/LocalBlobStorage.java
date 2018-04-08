@@ -48,4 +48,12 @@ public class LocalBlobStorage implements BlobStorage {
 	public Namenode getNamenode() {
 		return null;
 	}
+
+	/*
+    //TODO: Just commented to assure this is the right path
+	@Override
+	public void MapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) {
+		// TODO Just a Stub
+	}
+	*/
 }

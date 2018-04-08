@@ -72,4 +72,8 @@ public class DatanodeClient implements Datanode {
 //		System.out.println(response.getStatus());
 		return content;
 	}
+	
+	/*
+	 * TODO : Might Need a mapReduce method
+	 */
 }

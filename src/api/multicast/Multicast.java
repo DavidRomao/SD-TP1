@@ -16,7 +16,7 @@ public class Multicast {
     }
 
 
-    public Multicast(URI uri, int timeout) {
+    public Multicast(URI uri) {
         this.ip = uri.getHost();
         this.port = uri.getPort();
     }

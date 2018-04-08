@@ -59,7 +59,7 @@ public class BlobStorageClientTest {
         List<String> word = storage.listBlobs("Word");
         word.forEach(System.out::println);
         BlobReader strings = storage.readBlob(word.get(0));
-//        System.out.println(strings.readLine());
+        System.out.printf("Line: %s", strings.readLine());
                 storage.listBlobs("Word").forEach( blob -> {
             storage.readBlob( blob ).forEach( System.out::println );
         });

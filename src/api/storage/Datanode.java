@@ -22,4 +22,12 @@ public interface Datanode {
 	@Path("/{block}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	byte[] readBlock(@PathParam("block") String block);
+	
+	/*
+	@POST
+	@Path("/")
+	@Produces()
+	@Consumes()
+	void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize);
+	*/
 }

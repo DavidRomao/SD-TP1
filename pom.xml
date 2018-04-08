@@ -46,7 +46,7 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>sd18-tp1-base-49309-66666</imageName>
+							<imageName>sd18-tp1-base-49309-47942</imageName>
 							<baseImage>smduarte/sd18-tp1-openjdk8:latest</baseImage>
 							<entryPoint>[]</entryPoint>
 							<resources>
@@ -70,8 +70,8 @@
 							<goal>build</goal>
 						</goals>
 						<configuration>
-							<imageName>sd18-tp1-49309-66666</imageName>
-							<baseImage>sd18-tp1-base-49309-66666</baseImage>
+							<imageName>sd18-tp1-49309-47942</imageName>
+							<baseImage>sd18-tp1-base-49309-47942</baseImage>
 							<resources>
 								<resource>
 									<targetPath>/home/sd</targetPath>

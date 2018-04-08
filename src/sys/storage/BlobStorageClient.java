@@ -13,8 +13,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @author Cláudio Pereira 47942
  * @author David Romao 49309
- * @author retard number *****
  */
 public class BlobStorageClient implements api.storage.BlobStorage{
 
@@ -78,4 +78,13 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     public Namenode getNamenode() {
         return namenode;
     }
+    /*
+    //TODO: Just commented to assure this is the right path
+	@Override
+	public void MapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) {
+		// TODO For Now It doesn't actually call the MapReduce method
+		datanodes.values().forEach(datanode ->{
+			datanode.mapReduce(jobClassBlob, inputPrefix, outputPrefix, outPartSize);
+		});;
+	}*/
 }

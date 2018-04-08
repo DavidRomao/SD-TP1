@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * @author Cláudio Pereira 47942
  * @author David Romao 49309
  */
 public class NamenodeServer implements Namenode {
