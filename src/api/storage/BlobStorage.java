@@ -13,11 +13,6 @@ public interface BlobStorage {
 	BlobWriter blobWriter( String name );
 
 	Namenode getNamenode();
-	
-	/*
-	//TODO: Might be needed for MapReduce
-	void MapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize);
-	*/
 
 	interface BlobReader extends Iterable<String> {
 		String readLine();

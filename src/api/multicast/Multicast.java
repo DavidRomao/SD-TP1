@@ -72,7 +72,8 @@ public class Multicast {
             socket.send( request ) ;
 //            System.out.println("Multicast sent");
             long stopTime = System.currentTimeMillis() + 5000;
-            while (System.currentTimeMillis() < stopTime) {
+            int ntries = 0;
+            while (ntries < 5) {
                 socket.setSoTimeout(timeout);
                 try {
                     DatagramPacket datagram = new DatagramPacket(new byte[1024], 1024);
@@ -80,6 +81,7 @@ public class Multicast {
                     replies.add(new String(datagram.getData(), 0, datagram.getLength()));
                 }catch (SocketTimeoutException e){
                     socket.send( request ) ;
+                    ntries++;
 //            System.out.println("All replies received");
                 }
             }
