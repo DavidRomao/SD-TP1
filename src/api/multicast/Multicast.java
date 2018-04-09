@@ -48,9 +48,9 @@ public class Multicast {
                     response.setPort(request.getPort());
                     socket.send(response);
 
-                    System.out.println("Multicast.receive");
-                    System.out.println( "Address :" +request.getAddress());
-                    System.out.println("Port : " + request.getPort());
+                    System.err.println("Multicast.receive");
+                    System.err.println( "Address :" +request.getAddress());
+                    System.err.println("Port : " + request.getPort());
                 }
 
             }
@@ -70,11 +70,9 @@ public class Multicast {
             }
             DatagramPacket request = new DatagramPacket( data, data.length, group, port ) ;
             socket.send( request ) ;
-//            System.out.println("Multicast sent");
-            long stopTime = System.currentTimeMillis() + 5000;
             int ntries = 0;
+            socket.setSoTimeout(timeout);
             while (ntries < 5) {
-                socket.setSoTimeout(timeout);
                 try {
                     DatagramPacket datagram = new DatagramPacket(new byte[1024], 1024);
                     socket.receive(datagram);
