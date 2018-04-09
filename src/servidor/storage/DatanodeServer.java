@@ -9,6 +9,9 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Cláudio Pereira 47942
@@ -16,30 +19,36 @@ import java.net.MalformedURLException;
  */
 public class DatanodeServer implements Datanode,ComputeNode {
 
+	public static final int WaitingTime = 20 * 1000;
 	private String base_uri;
-
+	ConcurrentMap<String,Long> unverifiedBlocks = new ConcurrentHashMap<>();
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
+
+//		new Thread( () -> unverifiedBlocks.forEach( ( key, time ) -> {
+//			if( System.currentTimeMillis() - time > WaitingTime )
+//		} ));
 	}
 
 	@Override
 	public String createBlock(byte[] data){
+
 		try {
 			String id = Random.key64();
 			File blob = new File(id);
 			OutputStream out = new FileOutputStream(blob);
 			out.write(data);
 			out.close();
-
-			System.out.println("block created : " + base_uri +"/"+id);
+			System.out.printf("block created : %s/%s\n", base_uri, id);
+			unverifiedBlocks.put(id,System.currentTimeMillis());
 			return base_uri + "/" + id;
-      
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");
 			return null;
 		}
+
 	}
 
 	@Override
@@ -51,7 +60,7 @@ public class DatanodeServer implements Datanode,ComputeNode {
 			boolean delete = file.delete();
 			assert delete;
 		}else {
-			throw new WebApplicationException( Status.NOT_FOUND);
+			throw new WebApplicationException( Status . NOT_FOUND );
 		}
 		
 	}
@@ -72,6 +81,13 @@ public class DatanodeServer implements Datanode,ComputeNode {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
+
+	@Override
+	public void confirmBlocks(List<String> blocks) {
+		// remove blocks from the unverified blocks list
+		blocks.forEach( block -> unverifiedBlocks.remove(block));
+	}
+
 	@Override
 	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
 		//TODO  implement mapreduce
