@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
  */
 
 public class DatanodeServerLauncher {
+
     public static void main(String[] args) throws UnknownHostException {
 
         String URI_BASE;
@@ -36,7 +37,7 @@ public class DatanodeServerLauncher {
         JdkHttpServerFactory.createHttpServer(URI.create(URI_BASE), config);
         System.err.println("Datanode Server ready at ...."+URI_BASE);
 
-        PingReceiver pingReceiver = new PingReceiver(URI_BASE+Datanode.PATH,"Datanode");
+        PingReceiver pingReceiver = new PingReceiver(URI_BASE,"Datanode");
         Thread thread = new Thread( pingReceiver);
         thread.run();
     }

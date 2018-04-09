@@ -7,10 +7,9 @@ import sys.storage.io.BufferedBlobReader;
 import sys.storage.io.BufferedBlobWriter;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author Cláudio Pereira 47942
@@ -19,13 +18,14 @@ import java.util.Set;
 public class BlobStorageClient implements api.storage.BlobStorage{
 
     private static final int BLOCK_SIZE=512;
-
+    private Iterator<Datanode> datanodesIterator;
     private Namenode namenode;
-    private Map<String,Datanode> datanodes;
+    private ConcurrentMap<String,Datanode> datanodes;
 
     public BlobStorageClient() {
-        namenode = new NamenodeClient();
-        datanodes = new HashMap<>();
+        this.namenode = new NamenodeClient();
+        this.datanodes = new ConcurrentHashMap<>();
+        this.datanodesIterator = datanodes.values().iterator();
         discover(); // discover namenode servers
     }
 
@@ -34,14 +34,14 @@ public class BlobStorageClient implements api.storage.BlobStorage{
         Set<String> send = multicast.send("Datanode".getBytes(), 500);
         for (String s : send) {
             System.err.println(s);
-            URI uri = URI.create(s);
-            System.err.println("Connected to Datanode at : " + s );
-            datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri));
+            URI uri = URI.create(s + "datanode");
+            datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri ));
         }
     }
 
     @Override
     public List<String> listBlobs(String prefix) {
+        System.err.println("BlobStorageClient.listBlobs");
         List<String> list = namenode.list(prefix);
         return list;
     }
@@ -65,12 +65,15 @@ public class BlobStorageClient implements api.storage.BlobStorage{
 
     @Override
     public BlobReader readBlob(String name) {
+        System.err.println("BlobStorageClient.readBlob");
         return new BufferedBlobReader(name,namenode,datanodes);
     }
 
     @Override
     public BlobWriter blobWriter(String name) {
-        return new BufferedBlobWriter(name,namenode,datanodes,BLOCK_SIZE);
+        if (!datanodesIterator.hasNext())
+            datanodesIterator = datanodes.values().iterator();
+        return new BufferedBlobWriter(name,namenode,datanodesIterator.next(),BLOCK_SIZE);
     }
 
     @Override

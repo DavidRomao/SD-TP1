@@ -22,6 +22,7 @@ public class NamenodeClient implements Namenode {
     private static final String NAMENODE = "Namenode";
     private static Logger logger = Logger.getLogger(NamenodeClient.class.toString() );
 	private Gson gson;
+	private int counter;
 
 //    Trie<String, List<String>> names = new PatriciaTrie<>();
 
@@ -29,11 +30,11 @@ public class NamenodeClient implements Namenode {
 	public NamenodeClient() {
         Multicast multicast = new Multicast();
         gson = new Gson();
+        counter = 0 ;
         try {
             String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
             Client client = ClientBuilder.newClient(new ClientConfig());
-            System.err.println("Connected to namenode at : " +namenodeURI);
-            target = client.target(UriBuilder.fromUri(namenodeURI));
+            target = client.target(UriBuilder.fromUri(namenodeURI + "namenode"));
         }catch (NoSuchElementException e){
             System.err.println("No namenodes available");
             System.exit(0);
@@ -47,22 +48,32 @@ public class NamenodeClient implements Namenode {
         Invocation.Builder request = target.path("list/").queryParam("prefix",prefix).request(MediaType.APPLICATION_JSON);
         byte[] data = request.get(byte[].class);
         List<String> list = gson.fromJson(new String(data), List.class);
+        System.err.printf("Received list with %d blobs for prefix |%s|\n", list.size(), prefix);
         return list;
 	}
 
 	@Override
 	public void create(String name,  List<String> blocks) {
+
         WebTarget path = target.path(name);
+
         System.err.println("NamenodeClient.create");
+
         System.err.println(path.getUri());
+
         Response post = path.request(MediaType.APPLICATION_JSON).post(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
+
         System.err.println("post = " + post.getStatus());
+
+
 	}
 
 	@Override
 	public void delete(String prefix) {
         WebTarget path = target.path("/list").queryParam("prefix",prefix);
+
         Response delete = path.request().delete();
+
 //        System.err.println("NamenodeClient.delete");
 //        System.err.println("delete.getStatus() = " + delete.getStatus());
     }
@@ -70,6 +81,7 @@ public class NamenodeClient implements Namenode {
 	@Override
 	public void update(String name, List<String> blocks) {
         WebTarget path = target.path(name);
+
         Response put = path.request().put(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
 //        System.err.println("NamenodeClient.update");
 //        System.err.println("put = " + put.getStatus());

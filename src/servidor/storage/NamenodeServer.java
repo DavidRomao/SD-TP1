@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author David Romao 49309
  */
 public class NamenodeServer implements Namenode {
-    public static final String NAMENODE = "namenode";
+    public static final String NAMENODE = "Namenode";
     private ConcurrentMap<String,List<String>> nametable;
 
     public NamenodeServer() {
@@ -34,11 +34,16 @@ public class NamenodeServer implements Namenode {
                         names.add(s);
                 }
         });
+        System.err.println("Collected " + names.size());
+        System.err.println("Printing blocks uri");
+        names.forEach( name -> nametable.get(name).forEach(System.err::println));
         return names;
     }
 
     @Override
     public List<String> read(String name) {
+        System.err.println("NamenodeServer.read");
+        System.err.println("blob name " + name);
         List<String> strings = nametable.get(name);
         if (strings== null)
             throw new WebApplicationException(Response.Status.NOT_FOUND);
@@ -55,8 +60,8 @@ public class NamenodeServer implements Namenode {
             throw new WebApplicationException(Response.Status.CONFLICT);
         else
             nametable.put(name,blocks);
-        System.err.println("Blocks list size " + blocks.size());
-        blocks.forEach(System.err::println);
+//        blocks.forEach(System.err::println);
+        System.err.println("Current number of blobs stored " + nametable.size());
     }
 
     @Override

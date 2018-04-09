@@ -22,10 +22,12 @@ import java.util.logging.Logger;
  * 
  */
 public class DatanodeClient implements Datanode {
+
+	//todo suportar falhas de rede temporarias
 	private static Logger logger = Logger.getLogger(Datanode.class.toString() );
 
 	private static final int INITIAL_SIZE = 32;
-	private static final String DATANODE = "datanode";
+	private static final String DATANODE = "Datanode";
 	
 	private Map<String, byte[]> blocks = new HashMap<>(INITIAL_SIZE);
 	private WebTarget target;

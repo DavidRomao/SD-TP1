@@ -2,11 +2,9 @@ package test.blobstorage;
 
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
+import org.junit.jupiter.api.Test;
 import sys.storage.BlobStorageClient;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 
 import static api.storage.BlobStorage.BlobReader;
@@ -21,11 +19,13 @@ public class BlobStorageClientTest {
 
     public static void main(String[] args) {
         storage = new BlobStorageClient();
-        testWrite();
+        testWrite(100);
+        testRead(100);
 
+        test1();
     }
 
-    private void test1(){
+    private static void test1(){
 
         BlobStorageClient blobstorage = new BlobStorageClient();
         BlobWriter blobWriter = blobstorage.blobWriter("doc1.txt");
@@ -42,26 +42,29 @@ public class BlobStorageClientTest {
             }
         }
     }
-    private static void testWrite(){
-        try {
-            BlobWriter writer2 = storage.blobWriter("WordCount");
-            for( String line : Files.readAllLines(new File("WordCount.java").toPath()))
-                writer2.writeLine( line );
-            writer2.close();
-        } catch (IOException e) {
-            System.err.println("File not found");
+
+    @SuppressWarnings("Duplicates")
+    private static void testWrite(int k){
+
+        for (int i = 0; i < k ; i++) {
+
+            BlobWriter blobWriter = storage.blobWriter("Blob"+i);
+            for (int j = 0; j < 10; j++) {
+                blobWriter.writeLine("Content");
+            }
+            blobWriter.close();
         }
+
     }
 
-    private static void testRead(){
-        testWrite();
+    @Test
+    private static void testRead(int n){
+//        testWrite(100);
 
-        List<String> word = storage.listBlobs("Word");
+        List<String> word = storage.listBlobs("Blob");
+        assert word.size()== n;
+
         word.forEach(System.out::println);
-        BlobReader strings = storage.readBlob(word.get(0));
-        System.out.printf("Line: %s", strings.readLine());
-                storage.listBlobs("Word").forEach( blob -> {
-            storage.readBlob( blob ).forEach( System.out::println );
-        });
+
     }
 }

@@ -20,6 +20,7 @@ public class DatanodeServer implements Datanode,ComputeNode {
 
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
+		System.err.println("URI base" + base_uri);
 	}
 
 	@Override
