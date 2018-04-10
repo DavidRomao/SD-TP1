@@ -65,7 +65,6 @@ public class DatanodeClient implements Datanode {
 	public byte[] readBlock(String block) {
 		return  makeGet( target.path(block).request(),byte[].class);
 	}
-
     public static  <T> T makeGet(Invocation.Builder request, Class<T> aClass) {
         int tries = 0;
         T response = null;
@@ -130,4 +129,20 @@ public class DatanodeClient implements Datanode {
         //todo
 	}
 
+	/*
+	 * TODO : Might Need a mapReduce method
+	 */
+	
+	@Override
+	public void mapper(String jobClassBlob, String inputPrefix, String outputPrefix) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void reducer(String jobClassBlob, String inputPrefix, String outputPrefix) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

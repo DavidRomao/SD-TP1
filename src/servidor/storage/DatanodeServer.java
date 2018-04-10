@@ -1,23 +1,20 @@
 package servidor.storage;
 
-import api.mapreduce.ComputeNode;
 import api.storage.Datanode;
-import servidor.mapreduce.ComputeNodeClient;
 import utils.Random;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Cláudio Pereira 47942
  * @author David Romao 49309
  */
-public class DatanodeServer implements Datanode,ComputeNode {
+public class DatanodeServer implements Datanode {
 
 	public static final int WaitingTime = 20 * 1000;
 	private String base_uri;
@@ -102,19 +99,16 @@ public class DatanodeServer implements Datanode,ComputeNode {
 		// remove blocks from the unverified blocks list
 		blocks.forEach( block -> unverifiedBlocks.remove(block) );
 	}
-
 	@Override
-	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
-		//TODO  implement mapreduce
-		try {
-			ComputeNodeClient mapReducer= new ComputeNodeClient();
-			mapReducer.mapReduce(jobClassBlob, inputPrefix, outputPrefix, outPartSize);
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void mapper(String jobClassBlob, String inputPrefix , String outputPrefix ) {
 		
 	}
+	
+	@Override
+	public void reducer( String jobClassBlob, String inputPrefix , String outputPrefix ) {
+		
+	}
+	
 }
 
 

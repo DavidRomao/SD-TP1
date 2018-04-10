@@ -23,16 +23,18 @@ public interface Datanode {
 	@Path("/{block}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	byte[] readBlock(@PathParam("block") String block);
-
-	@POST
-	@Path("/validate")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void confirmBlocks(List<String> blocks);
-	/*
+	@Path("/validate")
 	@POST
-	@Path("/")
+
+	/*
+	void confirmBlocks(List<String> blocks);
+	@POST
+	//@Path()
 	@Produces()
-	@Consumes()
-	void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize);
-	*/
+	void mapper(@QueryParam("jobClassBlob") String jobClassBlob, @QueryParam("inputPrefix") String inputPrefix , @QueryParam("outputPrefix") String outputPrefix);
+	
+	@POST //Ou get?
+	//@Path()
+	void reducer( @QueryParam("jobClassBlob") String jobClassBlob, @QueryParam("inputPrefix") String inputPrefix , @QueryParam("outputPrefix") String outputPrefix);
 }
