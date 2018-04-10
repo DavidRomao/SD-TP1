@@ -26,21 +26,21 @@ public class DatanodeServer implements Datanode {
 
 		// Garbage Collector
 		// Launch the thread
-		new Thread( () -> {
-			try {
-				unverifiedBlocks.forEach((key, time) -> {
-                    if (System.currentTimeMillis() - time > WaitingTime) {
-                        boolean delete = new File(key).delete();
-                        if (delete)
-                            System.err.println("File deleted with success");
-                    }
-
-                });
-                Thread.sleep(WaitingTime);
-			} catch (InterruptedException e) {
-				System.out.println("Thread Sleep interrupted");
-			}
-		}).start();
+//		new Thread( () -> {
+//			try {
+//				unverifiedBlocks.forEach((key, time) -> {
+//                    if (System.currentTimeMillis() - time > WaitingTime) {
+//                        boolean delete = new File(key).delete();
+//                        if (delete)
+//                            System.err.println("File deleted with success");
+//                    }
+//
+//                });
+//                Thread.sleep(WaitingTime);
+//			} catch (InterruptedException e) {
+//				System.out.println("Thread Sleep interrupted");
+//			}
+//		}).start();
 	}
 
 	@Override
