@@ -3,10 +3,7 @@ package sys.storage;
 import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -45,10 +42,7 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public String createBlock(byte[] data) {
-		Response response = target.request().post(Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM));
-//		System.out.println("DatanodeClient.createBlock");
-//		System.out.println(response.getStatus());
-		return response.readEntity(String.class);
+		return makePost(target.request(), Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM) ,String.class);
 	}
 
 	/**
@@ -57,7 +51,7 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public void deleteBlock(String block) {
-		Response response = target.path(block).request().delete();
+		Response response = makeDelete(target.path(block).request());
 //		System.out.println("DatanodeClient.deleteBlock");
 //		System.out.println(response.getStatus());
 	}
@@ -69,19 +63,69 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public byte[] readBlock(String block) {
-		Response response = target.path(block).request().get();
-		byte[] content = response.readEntity(byte[].class);
-//		System.out.println("DatanodeClient.readBlock");
-//		System.out.println(response.getStatus());
-		return content;
+		return  makeGet( target.path(block).request(),byte[].class);
 	}
+
+    public static  <T> T makeGet(Invocation.Builder request, Class<T> aClass) {
+        int tries = 0;
+        T response = null;
+        while (response == null && tries < 5) {
+            try {
+                response = request.get(aClass);
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
+        return response;
+    }
+
+
+
+    public static  <D,T> D makePost(Invocation.Builder request, Entity<T> entity,Class<D> aClass) {
+        int tries = 0;
+        D response = null;
+        while (response == null && tries < 5) {
+            try {
+                response = request.post(entity,aClass);
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
+        return response;
+    }
+
+    public static Response makeDelete(Invocation.Builder request){
+        int tries = 0;
+        Response response = null;
+        while (response == null && tries < 5) {
+            try {
+                response = request.delete();
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
+        return response;
+    }
 
 	@Override
 	public void confirmBlocks(List<String> blocks) {
 
+		//todo
 	}
 
-	/*
-	 * TODO : Might Need a mapReduce method
-	 */
 }

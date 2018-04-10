@@ -71,9 +71,7 @@ public class NamenodeClient implements Namenode {
 	@Override
 	public void delete(String prefix) {
         WebTarget path = target.path("/list").queryParam("prefix",prefix);
-
-        Response delete = path.request().delete();
-
+        DatanodeClient.makeDelete(path.request());
 //        System.err.println("NamenodeClient.delete");
 //        System.err.println("delete.getStatus() = " + delete.getStatus());
     }
@@ -82,16 +80,36 @@ public class NamenodeClient implements Namenode {
 	public void update(String name, List<String> blocks) {
         WebTarget path = target.path(name);
 
-        Response put = path.request().put(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        Response put = makePut(path.request(),Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
 //        System.err.println("NamenodeClient.update");
 //        System.err.println("put = " + put.getStatus());
     }
 
-	@SuppressWarnings("unchecked")
+    private <T> Response makePut(Invocation.Builder request, Entity<T> entity) {
+        int tries = 0;
+        Response response = null;
+        while (response == null && tries < 5) {
+            try {
+                response = request.put(entity);
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
+        return response;
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
 	public List<String> read(String name) {
-        WebTarget path = target.path(name);
-        byte[] bytes = path.request().get(byte[].class);
-        return (List<String>) gson.fromJson(new String(bytes), List.class);
+        byte[] bytes = DatanodeClient.makeGet( target.path(name).request(), ( byte[].class) );
+        return (List<String>) gson.fromJson( new String(bytes), List.class);
     }
+
+
+
 }
