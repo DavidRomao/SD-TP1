@@ -1,9 +1,11 @@
 package servidor.storage;
 
 import api.storage.Namenode;
+import sys.storage.DatanodeClient;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,8 +60,15 @@ public class NamenodeServer implements Namenode {
             throw new WebApplicationException(Response.Status.NO_CONTENT);
         else if (nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
-        else
+        else {
             nametable.put(name,blocks);
+            // validate the blocks stored on the datanodes, to prove they are not forgotten
+            // as each blob is only stored in a datanode we can send the complete list just to one datanode
+            // http://0.0.0.0:9999/datanode/blockid
+            // http://0.0.0.0:9999 is at [0]
+            String ip_port = blocks.get(0).split("datanode")[0];
+            new DatanodeClient(URI.create(ip_port)).confirmBlocks(blocks);
+        }
 //        blocks.forEach(System.err::println);
         System.err.println("Current number of blobs stored " + nametable.size());
     }
