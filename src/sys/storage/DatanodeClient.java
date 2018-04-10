@@ -124,8 +124,10 @@ public class DatanodeClient implements Datanode {
 
 	@Override
 	public void confirmBlocks(List<String> blocks) {
-
-		//todo
+        Response response = makePost(target.path("/validate").request()
+                            ,Entity.entity(blocks, MediaType.APPLICATION_JSON)
+                            ,Response.class);
+        //todo
 	}
 
 }

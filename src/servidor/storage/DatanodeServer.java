@@ -26,9 +26,24 @@ public class DatanodeServer implements Datanode,ComputeNode {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
 
-//		new Thread( () -> unverifiedBlocks.forEach( ( key, time ) -> {
-//			if( System.currentTimeMillis() - time > WaitingTime )
-//		} ));
+
+		// Garbage Collector
+		// Launch the thread
+		new Thread( () -> {
+			try {
+				unverifiedBlocks.forEach((key, time) -> {
+                    if (System.currentTimeMillis() - time > WaitingTime) {
+                        boolean delete = new File(key).delete();
+                        if (delete)
+                            System.err.println("File deleted with success");
+                    }
+
+                });
+                Thread.sleep(WaitingTime);
+			} catch (InterruptedException e) {
+				System.out.println("Thread Sleep interrupted");
+			}
+		}).start();
 	}
 
 	@Override
@@ -85,7 +100,7 @@ public class DatanodeServer implements Datanode,ComputeNode {
 	@Override
 	public void confirmBlocks(List<String> blocks) {
 		// remove blocks from the unverified blocks list
-		blocks.forEach( block -> unverifiedBlocks.remove(block));
+		blocks.forEach( block -> unverifiedBlocks.remove(block) );
 	}
 
 	@Override
