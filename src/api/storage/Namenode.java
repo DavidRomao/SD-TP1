@@ -55,8 +55,8 @@ public interface Namenode {
 	@Path("/{name}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	void update(@PathParam("name") String name, List<String> blocks);
-	// 204 No Content | 404 Not Found
 
+	// 204 No Content | 404 Not Found
 	/**
 	 *	All blocks with {@code prefix} are deleted
 	 * @param prefix
@@ -66,4 +66,23 @@ public interface Namenode {
 	@Path("/list/")
 	void delete( @QueryParam("prefix") String prefix);
 	// 204 No Content | 404 Not Found
+
+	/**
+	 * Checks if a block belongs to a blob
+	 * @param name
+	 * @param block
+	 * @return
+	 */
+	@GET
+	@Path("/checkBlock/{name}/{block}")
+	boolean exists(@PathParam("name") String name, @PathParam("block") String block);
+
+	/**
+	 * Makes a deep search for a block through all the blobs
+	 * @param block
+	 * @return
+	 */
+	@GET
+	@Path("/checkBlock/{block}")
+	boolean exists(@PathParam("block") String block);
 }

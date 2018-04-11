@@ -20,8 +20,8 @@ public class Multicast {
         this.ip = uri.getHost();
         this.port = uri.getPort();
     }
-        
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public void receive(String answer, String expected) throws UnknownHostException {
         final int MAX_DATAGRAM_SIZE = 65536;
         final InetAddress group = InetAddress.getByName( this.ip) ;

@@ -1,10 +1,9 @@
 package sys.storage;
 
-import api.storage.BlobStorage;
+import api.RestRequests;
 import api.storage.Datanode;
-import sys.mapreduce.MapReducer;
-
 import org.glassfish.jersey.client.ClientConfig;
+import sys.mapreduce.MapReducer;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -24,7 +23,7 @@ import java.util.logging.Logger;
  */
 public class DatanodeClient implements Datanode {
 
-	//todo suportar falhas de rede temporarias
+    //todo suportar falhas de rede temporarias
 	private static Logger logger = Logger.getLogger(Datanode.class.toString() );
 
 	private static final int INITIAL_SIZE = 32;
@@ -44,8 +43,8 @@ public class DatanodeClient implements Datanode {
 	 * @return the complete block uri
 	 */
 	@Override
-	public String createBlock(byte[] data) {
-		return makePost(target.request(), Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM) ,String.class);
+	public String createBlock(byte[] data,String blobName) {
+		return RestRequests.makePost(target.queryParam(BLOB_NAME,blobName).request(), Entity.entity( data, MediaType.APPLICATION_OCTET_STREAM) ,String.class);
 	}
 
 	/**
@@ -54,7 +53,7 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public void deleteBlock(String block) {
-		Response response = makeDelete(target.path(block).request());
+		Response response = RestRequests.makeDelete(target.path(block).request());
 //		System.out.println("DatanodeClient.deleteBlock");
 //		System.out.println(response.getStatus());
 	}
@@ -66,70 +65,15 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public byte[] readBlock(String block) {
-		return  makeGet( target.path(block).request(),byte[].class);
+		return  RestRequests.makeGet( target.path(block).request(),byte[].class);
 	}
-    public static  <T> T makeGet(Invocation.Builder request, Class<T> aClass) {
-        int tries = 0;
-        T response = null;
-        while (response == null && tries < 5) {
-            try {
-                response = request.get(aClass);
-            } catch (javax.ws.rs.ProcessingException e) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    System.err.println("WARNING: Sleep interrupted");
-                }
-                tries++;
-            }
-        }
-        return response;
-    }
 
 
-
-    public static  <D,T> D makePost(Invocation.Builder request, Entity<T> entity,Class<D> aClass) {
-        int tries = 0;
-        D response = null;
-        while (response == null && tries < 5) {
-            try {
-                response = request.post(entity,aClass);
-            } catch (javax.ws.rs.ProcessingException e) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    System.err.println("WARNING: Sleep interrupted");
-                }
-                tries++;
-            }
-        }
-        return response;
-    }
-
-    public static Response makeDelete(Invocation.Builder request){
-        int tries = 0;
-        Response response = null;
-        while (response == null && tries < 5) {
-            try {
-                response = request.delete();
-            } catch (javax.ws.rs.ProcessingException e) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    System.err.println("WARNING: Sleep interrupted");
-                }
-                tries++;
-            }
-        }
-        return response;
-    }
-
-	@Override
+    @Override
 	public void confirmBlocks(List<String> blocks) {
-        Response response = makePost(target.path("/validate").request()
+        Response response = RestRequests.makePost(target.path("/validate").request()
                             ,Entity.entity(blocks, MediaType.APPLICATION_JSON)
                             ,Response.class);
-        //todo
 	}
 
 	/*

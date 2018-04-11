@@ -102,6 +102,28 @@ public class NamenodeServer implements Namenode {
         else throw new WebApplicationException(Response.Status.NO_CONTENT);
     }
 
+    @Override
+    public boolean exists(String name, String block) {
+        try{
+            return nametable.get(name).indexOf(block) != -1;
+        }catch (NullPointerException e){
+            return false;
+        }
+    }
 
-    
+    @Override
+    public boolean exists(String block) {
+        final boolean[] exist = {false};
+        nametable.forEach( (String key, List<String> list) -> {
+            for (String id : list) {
+                if (id.contains(block)) {
+                    exist[0] = true;
+                    return; // end forEach loop , similar to break
+                }
+            }
+        } );
+        return exist[0];
+    }
+
+
 }

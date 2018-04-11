@@ -1,22 +1,23 @@
 package api.storage;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-
 import sys.mapreduce.MapReducer;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path( Datanode.PATH ) 
 public interface Datanode {
 
 	static final String PATH = "datanode";
-	
+	String BLOB_NAME = "blobName";
+
 	@POST
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	String createBlock(byte[] data);
+	@QueryParam("blobName")
+	String createBlock(byte[] data, @QueryParam(BLOB_NAME)String blobName );
 	
 	@DELETE
 	@Path("/{block}")

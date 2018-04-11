@@ -42,8 +42,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     @Override
     public List<String> listBlobs(String prefix) {
         System.err.println("BlobStorageClient.listBlobs");
-        List<String> list = namenode.list(prefix);
-        return list;
+        return namenode.list(prefix);
     }
 
     @Override

@@ -35,7 +35,7 @@ public class BufferedBlobWriter implements BlobWriter {
 	}
 
 	private void flush( byte[] data, boolean eob ) {
-		blocks.add( currentDatanode.createBlock(data)  );
+		blocks.add( currentDatanode.createBlock(data,name)  );
 		if( eob ) {
 			namenode.create(name, blocks);
 			blocks.clear();
