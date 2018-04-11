@@ -3,12 +3,17 @@ package servidor.mapreduce;
 import api.mapreduce.ComputeNode;
 import api.storage.BlobStorage;
 import api.storage.Namenode;
+import sys.mapreduce.Jobs;
 import sys.mapreduce.MapReduceEngine;
+import sys.mapreduce.MapReducer;
 import sys.storage.BlobStorageClient;
+import sys.storage.DatanodeClient;
 import utils.Random;
 
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+
+import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,10 +43,26 @@ public class ComputeNodeServer implements ComputeNode{
 
     @Override
     public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
-    	/*
+
     	BlobStorage storage = new BlobStorageClient() ;
-        MapReduceEngine engine = new MapReduceEngine("local",storage);
-        Map<String,List<String>> blocksByDatanode = new HashMap<>();
+        Namenode namenode = storage.getNamenode();
+		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
+        /*
+        storage.listBlobs(inputPrefix).forEach(blob -> {
+            namenode.read(blob).forEach(block ->{
+
+            });
+        });*/
+        String block = namenode.read(storage.listBlobs(inputPrefix).get(0)).get(0);
+    	String ip_path = block.split("//")[1];
+    	String ip = ip_path.split("/")[0];
+    	URI uri = URI.create("http://" + ip + "/datanode");
+    	DatanodeClient client = new DatanodeClient(uri);
+    	client.mapper(job, inputPrefix, outputPrefix);
+    	client.reducer(job, inputPrefix, outputPrefix, outPartSize);
+
+
+    	/*Map<String,List<String>> blocksByDatanode = new HashMap<>();
         Namenode namenode = storage.getNamenode();
         storage.listBlobs(inputPrefix).forEach( blob -> {
             namenode.read(blob).forEach( block -> {
@@ -69,12 +90,9 @@ public class ComputeNodeServer implements ComputeNode{
             System.out.println("datanode ip : " + datanode);
             blocksByDatanode.get(datanode).forEach(System.out::println);
             System.out.printf("\n");
-        });
-        */ 
-    	//TODO : In my opinion this doesn't make much sense since the own mapreducer finds all blocks, calling the engine seems to be enough
-    	BlobStorage storage = new BlobStorageClient() ;
+        });*/
     	
-		MapReduceEngine engine = new MapReduceEngine( "local", storage);
-        engine.executeJob(jobClassBlob,inputPrefix,outputPrefix,outPartSize);
+		//MapReduceEngine engine = new MapReduceEngine( "local", storage);
+        //engine.executeJob(jobClassBlob,inputPrefix,outputPrefix,outPartSize);
     }
 }

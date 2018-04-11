@@ -2,6 +2,9 @@ package api.storage;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+
+import sys.mapreduce.MapReducer;
+
 import java.util.List;
 
 @Path( Datanode.PATH ) 
@@ -23,18 +26,19 @@ public interface Datanode {
 	@Path("/{block}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	byte[] readBlock(@PathParam("block") String block);
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/validate")
-	@POST
-
-	/*
-	void confirmBlocks(List<String> blocks);
-	@POST
-	//@Path()
-	@Produces()
-	void mapper(@QueryParam("jobClassBlob") String jobClassBlob, @QueryParam("inputPrefix") String inputPrefix , @QueryParam("outputPrefix") String outputPrefix);
 	
-	@POST //Ou get?
-	//@Path()
-	void reducer( @QueryParam("jobClassBlob") String jobClassBlob, @QueryParam("inputPrefix") String inputPrefix , @QueryParam("outputPrefix") String outputPrefix);
+	@POST
+	@Path("/validate")
+	@Consumes(MediaType.APPLICATION_JSON)
+	void confirmBlocks(List<String> blocks);
+	
+	@POST
+	@Path("/mapper")
+	@Consumes(MediaType.APPLICATION_JSON)
+	void mapper(MapReducer job, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix);
+	
+	@POST
+	@Path("/reducer")
+	@Consumes(MediaType.APPLICATION_JSON)
+	void reducer(MapReducer job, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outPartitionSize") int outPartitionSize);
 }

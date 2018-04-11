@@ -55,6 +55,5 @@ public class BufferedBlobWriter implements BlobWriter {
 	@Override
 	public void close() {
 		flush( buf.toByteArray(), true );
-		//TODO nao temos de fazer buf.reset(); ?
 	}
 }

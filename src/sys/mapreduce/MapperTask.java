@@ -13,7 +13,7 @@ public class MapperTask extends MapReduceTask {
 
 	private final String MapOutputBlobNameFormat;
 	
-	protected MapperTask(String worker, BlobStorage storage, String jobClassBlob, String inputPrefix , String outputPrefix ) {		
+	public MapperTask(String worker, BlobStorage storage, String jobClassBlob, String inputPrefix , String outputPrefix ) {		
 		super( worker, storage, jobClassBlob, inputPrefix, outputPrefix );		
 		MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + worker;
 	}

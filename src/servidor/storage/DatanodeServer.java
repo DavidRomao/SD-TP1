@@ -1,13 +1,34 @@
 package servidor.storage;
 
 import api.storage.Datanode;
+import api.storage.BlobStorage;
+import api.storage.BlobStorage.BlobWriter;
+import jersey.repackaged.com.google.common.collect.Lists;
+import sys.mapreduce.Jobs;
+import sys.mapreduce.JsonBlobWriter;
+import sys.mapreduce.MapReducer;
+import sys.mapreduce.MapperTask;
+import sys.mapreduce.ReducerTask;
+import sys.storage.BlobStorageClient;
+import utils.Base58;
+import utils.JSON;
 import utils.Random;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
+
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,6 +40,8 @@ public class DatanodeServer implements Datanode {
 	public static final int WaitingTime = 20 * 1000;
 	private String base_uri;
 	ConcurrentMap<String,Long> unverifiedBlocks = new ConcurrentHashMap<>();
+	private List results;
+	
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
@@ -93,22 +116,55 @@ public class DatanodeServer implements Datanode {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
-
 	@Override
 	public void confirmBlocks(List<String> blocks) {
 		// remove blocks from the unverified blocks list
 		blocks.forEach( block -> unverifiedBlocks.remove(block) );
 	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
-	public void mapper(String jobClassBlob, String inputPrefix , String outputPrefix ) {
+	public void mapper(MapReducer job, String block, String outputPrefix) {
+		
+		
+		//new MapperTask("Datanode", storage, jobClassBlob, inputPrefix, outputPrefix).execute();
+		List results = new LinkedList<LinkedHashMap<Object, Object>>();
+		job.setYielder( (key,val) -> results.add(new LinkedHashMap<>().put(key, val)));
+		
+		job.map_init();
+		String[] lines = new String(readBlock(block)).split("\n");
+		for(int i=0;lines[i]!= null;i++) {
+			System.out.println(lines[i]);
+			job.map( block, lines[i] );
+		}
+
+		job.map_end();
 		
 	}
 	
 	@Override
-	public void reducer( String jobClassBlob, String inputPrefix , String outputPrefix ) {
-		
+	public void reducer(MapReducer job, String inputPrefix , String outputPrefix, int outPartitionSize) {
+		/*
+		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
+				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
+				.collect( Collectors.toSet() );
+			
+			
+			AtomicInteger partitionCounter = new AtomicInteger(0);
+			Lists.partition( new ArrayList<>( reduceKeyPrefixes), outPartitionSize).forEach(partitionKeyList -> {
+					
+					String partitionOutputBlob = String.format("%s-part%04d", outputPrefix, partitionCounter.incrementAndGet());
+					
+					BlobWriter writer = storage.blobWriter(partitionOutputBlob);
+
+					partitionKeyList.forEach( keyPrefix -> {
+						//new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
+					});			
+					
+					writer.close();
+				});
+		*/
 	}
-	
 }
 
 

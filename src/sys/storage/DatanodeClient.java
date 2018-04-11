@@ -1,6 +1,9 @@
 package sys.storage;
 
+import api.storage.BlobStorage;
 import api.storage.Datanode;
+import sys.mapreduce.MapReducer;
+
 import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.*;
@@ -134,15 +137,18 @@ public class DatanodeClient implements Datanode {
 	 */
 	
 	@Override
-	public void mapper(String jobClassBlob, String inputPrefix, String outputPrefix) {
-		// TODO Auto-generated method stub
-		
+	public void mapper(MapReducer job, String inputBlock, String outputPrefix) {
+		Response response = target.path("/mapper").queryParam("inputPrefix", inputBlock).queryParam("outputPrefix",outputPrefix).request().post(Entity.entity(job, MediaType.APPLICATION_JSON));
+		//Response response = makePost(target.path("/mapper").request()
+		//					,Entity.entity(entity, mediaType));
+		System.out.println("Mapper Status: " + response.getStatus());
 	}
 
 	@Override
-	public void reducer(String jobClassBlob, String inputPrefix, String outputPrefix) {
+	public void reducer(MapReducer job, String inputPrefix , String outputPrefix, int outputPartitionSize) {
 		// TODO Auto-generated method stub
-		
+		Response response = target.path("/reducer").queryParam("inputPrefix", inputPrefix).queryParam("outputPrefix",outputPrefix).queryParam("outputPartitionSize",outputPartitionSize).request().post(Entity.entity(job, MediaType.APPLICATION_JSON));
+		System.out.println("Reducer Status: " + response.getStatus());
 	}
 	
 }

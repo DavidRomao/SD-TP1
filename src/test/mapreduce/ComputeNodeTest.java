@@ -23,10 +23,10 @@ public class ComputeNodeTest {
      *
      */
     public static void main(String[] args) throws Exception {
-
+        
         //1. Get the storage implementation. Replace with your own implementation...
         BlobStorage storage = new BlobStorageClient();
-
+        
         //2. Copy all lines of WordCount.java to a blob named WordCount.
         BlobStorage.BlobWriter src = storage.blobWriter("WordCount");
         Files.readAllLines(new File("WordCount.java").toPath())
@@ -43,7 +43,7 @@ public class ComputeNodeTest {
         storage.listBlobs("doc-").stream().forEach( blob -> {
             storage.readBlob(blob).forEach( System.out::println );
         });
-
+        
         //5. Make sure there are no blobs in storage whose names start with "results-"
         storage.deleteBlobs("results-");
 
@@ -67,5 +67,6 @@ public class ComputeNodeTest {
             System.out.println(blob);
             storage.readBlob(blob).forEach( System.out::println );
         });
+        
     }
 }

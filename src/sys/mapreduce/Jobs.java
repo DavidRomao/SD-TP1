@@ -18,7 +18,7 @@ final public class Jobs {
 	static Map<String, String > sources = new HashMap<>();
 
 	
-	static protected JobInstance<?> newJobInstance(BlobStorage storage, String jobClassBlob) {
+	public static JobInstance<?> newJobInstance(BlobStorage storage, String jobClassBlob) {
 		String source = sources.get( jobClassBlob );
 		if( source == null ) {
 			StringBuilder sb = new StringBuilder();
@@ -32,8 +32,8 @@ final public class Jobs {
 	*
 	*
 	*/
-	static class JobInstance<T extends MapReducer<?, ?, ?, ?>> {
-		protected final T instance;
+	public static class JobInstance<T extends MapReducer<?, ?, ?, ?>> {
+		public final T instance;
 		protected final Type[] kvTypes;
 
 		JobInstance(T instance) {

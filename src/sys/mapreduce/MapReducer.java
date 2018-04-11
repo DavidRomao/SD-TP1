@@ -35,12 +35,12 @@ abstract public class MapReducer<MK, MV, RK, RV>  implements MapReduce<MK, MV, R
 		yielder.yield(key, val);
 	}
 	
-	final void setYielder( Yielder yielder ) {
+	public final void setYielder( Yielder yielder ) {
 		this.yielder = yielder;
 	}
 
 	
-	interface Yielder {
+	public interface Yielder {
 		void yield( Object key, Object val );
 	}
 	
