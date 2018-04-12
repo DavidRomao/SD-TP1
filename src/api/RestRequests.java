@@ -65,7 +65,7 @@ public class RestRequests {
     public static <T> Response makePost(Invocation.Builder request, Entity<T> entity) {
         int tries = 0;
         Response response = null;
-        while ( tries < 5) {
+        while ( response== null && tries < 5) {
             try {
                 response = request.post(entity);
             } catch (javax.ws.rs.ProcessingException e) {

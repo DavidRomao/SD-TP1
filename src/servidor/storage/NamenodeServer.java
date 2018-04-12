@@ -65,7 +65,7 @@ public class NamenodeServer implements Namenode {
             // validate the blocks stored on the datanodes, to prove they are not forgotten
             // as each blob is only stored in a datanode we can send the complete list just to one datanode
             // http://0.0.0.0:9999/datanode/blockid
-            // http://0.0.0.0:9999 is at [0]
+            // http://0.0.0.0:9999 is at [0
             String ip_port = blocks.get(0).split("datanode")[0];
             new DatanodeClient(URI.create(ip_port)).confirmBlocks(blocks);
         }

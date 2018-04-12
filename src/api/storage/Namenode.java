@@ -7,7 +7,7 @@ import java.util.List;
 @Path(Namenode.PATH)
 public interface Namenode {
 
-	static final String PATH="namenode";
+	static final String PATH="/namenode";
 
 	/**
 	 *

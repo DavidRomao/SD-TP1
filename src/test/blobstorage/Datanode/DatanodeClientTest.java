@@ -13,7 +13,7 @@ public class DatanodeClientTest {
     public static void createBlock() {
         DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/v1/datanode"));
         byte[] block = STRINGS_FOR_TEST_ARE_ENDLESS.getBytes();
-        String id = client.createBlock(block);
+        String id = client.createBlock(block,"blob");
         System.out.println(id);
         byte[] bytes = client.readBlock(id.split("/")[5]);
         String string = new String(bytes, 0, STRINGS_FOR_TEST_ARE_ENDLESS.length());
@@ -32,7 +32,7 @@ public class DatanodeClientTest {
 
     private static void read(){
         DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/datanode"));
-        String block1 = client.createBlock("this is a block data".getBytes());
+        String block1 = client.createBlock("this is a block data".getBytes(),"blob");
         byte[] block = client.readBlock(block1.substring(block1.lastIndexOf("/")+1));
         String s = new String(block);
         System.out.println(s);

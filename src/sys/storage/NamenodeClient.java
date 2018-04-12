@@ -52,8 +52,18 @@ public class NamenodeClient implements Namenode {
 
 	@Override
 	public void create(String name,  List<String> blocks) {
-        Invocation.Builder request = target.request(MediaType.APPLICATION_JSON);
-        Response post = RestRequests.makePost(request, Entity.entity( gson.toJson(blocks), MediaType.APPLICATION_JSON));
+
+        WebTarget path = target.path(name);
+
+        System.err.println("NamenodeClient.create");
+
+        System.err.println(path.getUri());
+
+//        Response post = path.request(MediaType.APPLICATION_JSON).post(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        Response post = RestRequests.makePost(path.request(MediaType.APPLICATION_JSON), Entity.entity( gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        System.err.println("post = " + post.getStatus());
+
+
 	}
 
 	@Override
