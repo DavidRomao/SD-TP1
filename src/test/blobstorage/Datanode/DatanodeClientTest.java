@@ -1,8 +1,14 @@
 package test.blobstorage.Datanode;
 
+import api.storage.BlobStorage;
+import sys.mapreduce.Jobs;
+import sys.storage.BlobStorageClient;
 import sys.storage.DatanodeClient;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,8 +44,31 @@ public class DatanodeClientTest {
         System.out.println(s);
         System.out.println("block1 = " + block1);
     }
-    public static void main(String[] args) {
+
+    private static void mapper() throws IOException {
+
+        BlobStorage storage = new BlobStorageClient();
+
+        //2. Copy all lines of WordCount.java to a blob named WordCount.
+        BlobStorage.BlobWriter src = storage.blobWriter("WordCount");
+        Files.readAllLines(new File("WordCount.java").toPath())
+                .stream().forEach( src::writeLine );
+        src.close();
+
+        //3. Do same to files doc-1 and doc-2
+        for( String doc : new String[] {"doc-1", "doc-2"}) {
+            BlobStorage.BlobWriter out = storage.blobWriter(doc);
+            Files.readAllLines(new File(doc + ".txt").toPath()).stream().forEach( out::writeLine );
+            out.close();
+        }
+        DatanodeClient client = new DatanodeClient(URI.create("http://localhost:9999/datanode"));
+
+
+        client.mapper(Jobs.newJobInstance(storage,"WordCount").instance,"doc-1",storage.getNamenode().list("doc"),"testOut-");
+    }
+    public static void main(String[] args) throws IOException {
 //    	createBlock();
-    	read();
+//    	read();
+        mapper();
     }
 }

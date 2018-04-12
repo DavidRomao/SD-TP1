@@ -12,15 +12,15 @@ final public class JsonBlobWriter {
 	
 	private final BlobWriter out;
 	
-	JsonBlobWriter( BlobWriter out ) {
+	public JsonBlobWriter(BlobWriter out) {
 		this.out = out;
 	}
 	
-	<T> void write( T obj ) {	
+	public <T> void write(T obj) {
 		out.writeLine( JSON.encode(obj) );
 	}
 		
-	void close() {
+	public void close() {
 		out.close();
 	}
 }

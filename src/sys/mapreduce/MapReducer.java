@@ -2,7 +2,11 @@ package sys.mapreduce;
 
 import api.mapreduce.MapReduce;
 
-abstract public class MapReducer<MK, MV, RK, RV>  implements MapReduce<MK, MV, RK, RV>  {
+import java.io.Serializable;
+
+abstract public class MapReducer<MK, MV, RK, RV>  implements MapReduce<MK, MV, RK, RV> , Serializable {
+
+	private static final long serialVersionUID = -6849794470754667710L;
 		
 	@Override
 	public void map_init() {}

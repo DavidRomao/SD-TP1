@@ -1,9 +1,9 @@
 package sys.storage;
 
 import api.RestRequests;
+import api.storage.BlobStorage;
 import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
-import sys.mapreduce.MapReducer;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -31,10 +31,16 @@ public class DatanodeClient implements Datanode {
 	
 	private Map<String, byte[]> blocks = new HashMap<>(INITIAL_SIZE);
 	private WebTarget target;
-	
+	private BlobStorage storage;
+
 	public DatanodeClient(URI datanodeURI) {
-		 Client client = ClientBuilder.newClient(new ClientConfig());
-		 target = client.target(datanodeURI);
+		Client client = ClientBuilder.newClient(new ClientConfig());
+		target = client.target(datanodeURI);
+	}
+	public DatanodeClient(URI datanodeURI, BlobStorage storage) {
+		this.storage = storage;
+		Client client = ClientBuilder.newClient(new ClientConfig());
+		target = client.target(datanodeURI);
 	}
 
 	/**
@@ -72,26 +78,28 @@ public class DatanodeClient implements Datanode {
     @Override
 	public void confirmBlocks(List<String> blocks) {
         Response response = RestRequests.makePost(target.path("/validate").request()
-                            ,Entity.entity(blocks, MediaType.APPLICATION_JSON)
-                            ,Response.class);
+                            ,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
 	}
 
-	/*
-	 * TODO : Might Need a mapReduce method
-	 */
-	
 	@Override
-	public void mapper(MapReducer job, String inputBlock, String outputPrefix) {
-		Response response = target.path("/mapper").queryParam("inputPrefix", inputBlock).queryParam("outputPrefix",outputPrefix).request().post(Entity.entity(job, MediaType.APPLICATION_JSON));
-		//Response response = makePost(target.path("/mapper").request()
-		//					,Entity.entity(entity, mediaType));
+	public void mapper(String jobClass, String blob, List<String> blocks, String outputPrefix) {
+		Response response = target.path("/mapper").queryParam("blob").
+				queryParam("outputPrefix", outputPrefix).
+				request().
+				post(Entity.entity(jobClass, MediaType.APPLICATION_JSON));
+		//Response path = makePost(target.path("/mapper").request()
+		//				 	,Entity.entity(entity, mediaType));
 		System.out.println("Mapper Status: " + response.getStatus());
 	}
 
 	@Override
-	public void reducer(MapReducer job, String inputPrefix , String outputPrefix, int outputPartitionSize) {
+	public void reducer(String jobClass, String inputPrefix, String outputPrefix, int outPartitionSize) {
 		// TODO Auto-generated method stub
-		Response response = target.path("/reducer").queryParam("inputPrefix", inputPrefix).queryParam("outputPrefix",outputPrefix).queryParam("outputPartitionSize",outputPartitionSize).request().post(Entity.entity(job, MediaType.APPLICATION_JSON));
+		Response response = target.path("/reducer").
+				queryParam("inputPrefix", inputPrefix).
+				queryParam("outputPrefix",outputPrefix).
+				queryParam("outputPartitionSize", outPartitionSize).
+				request().post(Entity.entity(jobClass, MediaType.APPLICATION_JSON));
 		System.out.println("Reducer Status: " + response.getStatus());
 	}
 	

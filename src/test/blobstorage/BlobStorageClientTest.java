@@ -2,6 +2,7 @@ package test.blobstorage;
 
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
+import org.glassfish.hk2.api.messaging.SubscribeTo;
 import org.junit.jupiter.api.Test;
 import sys.storage.BlobStorageClient;
 
@@ -20,9 +21,9 @@ public class BlobStorageClientTest {
     public static void main(String[] args) {
         storage = new BlobStorageClient();
         testWrite(100);
-        testRead(100);
+//        testRead(100);
 
-        test1();
+//        test1();
     }
 
     private static void test1(){
@@ -59,12 +60,11 @@ public class BlobStorageClientTest {
 
     @Test
     private static void testRead(int n){
-//        testWrite(100);
+//        testWrite(10);
 
         List<String> word = storage.listBlobs("Blob");
         assert word.size()== n;
 
-        word.forEach(System.out::println);
-
+        word.forEach( blobl -> storage.readBlob(blobl).readLine());
     }
 }

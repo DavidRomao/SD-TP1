@@ -16,7 +16,7 @@ public interface Namenode {
 	 * @apiNote 200 OK [empty List]
 	 */
 	@GET
-	@Path("/list/")
+	@Path("/list")
 	@Produces(MediaType.APPLICATION_JSON)
 	List<String> list( @QueryParam("prefix") String prefix);
 	// 200 OK [empty List]
@@ -75,6 +75,7 @@ public interface Namenode {
 	 */
 	@GET
 	@Path("/checkBlock/{name}/{block}")
+	@Produces(MediaType.APPLICATION_JSON)
 	boolean exists(@PathParam("name") String name, @PathParam("block") String block);
 
 	/**
@@ -84,5 +85,6 @@ public interface Namenode {
 	 */
 	@GET
 	@Path("/checkBlock/{block}")
+	@Produces(MediaType.APPLICATION_JSON)
 	boolean exists(@PathParam("block") String block);
 }

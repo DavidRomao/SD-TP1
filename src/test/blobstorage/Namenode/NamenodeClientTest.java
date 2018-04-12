@@ -17,8 +17,8 @@ class NamenodeClientTest {
         for (int i = 0; i < 100; i++) {
             blocks.add("Strings for test are endless");
         }
-//        client.create("endless",blocks);
-//        client.create("endolas",blocks);
+        client.create("endless",blocks);
+        client.create("endolas",blocks);
         List<String> endolas = client.list("end");
         for (String s : endolas) {
             System.out.println(s);

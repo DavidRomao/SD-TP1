@@ -26,5 +26,5 @@ public interface ComputeNode {
     
 
     @WebMethod
-    void mapReduce( String jobClassBlob, String inputPrefix , String outputPrefix, int outPartSize ) throws InvalidArgumentException ;
+    boolean mapReduce( String jobClassBlob, String inputPrefix , String outputPrefix, int outPartSize ) throws InvalidArgumentException ;
 }

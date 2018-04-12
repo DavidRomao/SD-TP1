@@ -22,7 +22,9 @@ final public class Jobs {
 		String source = sources.get( jobClassBlob );
 		if( source == null ) {
 			StringBuilder sb = new StringBuilder();
-			storage.readBlob(jobClassBlob).forEach(line -> sb.append(line).append('\n'));
+			for (String line : storage.readBlob(jobClassBlob)) {
+				sb.append(line).append('\n');
+			}
 			sources.put( jobClassBlob, source = sb.toString());
 		}
 		return new JobInstance<MapReducer<?, ?, ?, ?>>(Java.newInstance(jobClassBlob, source ));

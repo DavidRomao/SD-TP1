@@ -4,6 +4,7 @@ import api.multicast.PingReceiver;
 import api.storage.Datanode;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import utils.IP;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -26,7 +27,7 @@ public class DatanodeServerLauncher {
             System.err.println("Created new datanode server with new URI");
             System.err.println("args.length = " + args.length);
         }catch ( ArrayIndexOutOfBoundsException e){
-            URI_BASE = String.format("http://%s:%d/",InetAddress.getLocalHost().getHostAddress(),9999);
+            URI_BASE = String.format("http://%s:%d/", IP.hostAddress(),9999);
             System.err.println("Created new datanode server with base URI");
             System.err.println("args.length = " + args.length);
         }

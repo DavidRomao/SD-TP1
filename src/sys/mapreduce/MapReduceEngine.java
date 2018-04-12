@@ -36,8 +36,7 @@ public class MapReduceEngine {
 
 				partitionKeyList.forEach( keyPrefix -> {
 					new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
-				});			
-				
+				});
 				writer.close();
 			});
 	}

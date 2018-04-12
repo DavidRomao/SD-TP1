@@ -1,7 +1,5 @@
 package api.storage;
 
-import sys.mapreduce.MapReducer;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -36,10 +34,11 @@ public interface Datanode {
 	@POST
 	@Path("/mapper")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void mapper(MapReducer job, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix);
-	
-	@POST
+	void mapper(@QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob, List<String> blocks, @QueryParam("outputPrefix") String outputPrefix);
+
+
+    @POST
 	@Path("/reducer")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void reducer(MapReducer job, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outPartitionSize") int outPartitionSize);
+	void reducer(@QueryParam("jobClass") String jobClass, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outPartitionSize") int outPartitionSize);
 }

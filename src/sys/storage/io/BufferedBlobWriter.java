@@ -44,6 +44,8 @@ public class BufferedBlobWriter implements BlobWriter {
 
 	@Override
 	public void writeLine(String line) {
+//		System.err.println("BufferedBlobWriter.writeLine");
+//		System.err.println(line);
 		if( buf.size() + line.length() > blockSize - 1 ) {
 			this.flush(buf.toByteArray(), false);
 			buf.reset();

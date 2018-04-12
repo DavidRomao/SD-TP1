@@ -31,6 +31,7 @@ public class NamenodeClient implements Namenode {
         gson = new Gson();
         try {
             String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
+            System.err.println("Namenode discovered at " + namenodeURI);
             Client client = ClientBuilder.newClient(new ClientConfig());
             target = client.target(UriBuilder.fromUri(namenodeURI + "namenode"));
         }catch (NoSuchElementException e){
@@ -43,7 +44,7 @@ public class NamenodeClient implements Namenode {
     @Override
 	public List<String> list(String prefix) {
 	    //todo find out how query params work
-        Invocation.Builder request = target.path("list/").queryParam("prefix",prefix).request(MediaType.APPLICATION_JSON);
+        Invocation.Builder request = target.path("list").queryParam("prefix",prefix).request(MediaType.APPLICATION_JSON);
         byte[] data = RestRequests.makeGet(request, byte[].class);
         List<String> list = gson.fromJson(new String(data), List.class);
         System.err.printf("Received list with %d blobs for prefix |%s|\n", list.size(), prefix);

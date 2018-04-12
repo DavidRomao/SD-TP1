@@ -1,6 +1,7 @@
 import sys.mapreduce.MapReducer;
 
-public class WordCount extends MapReducer<String, String, String, Long>{
+public class WordCount extends MapReducer<String, String, String, Long> {
+
 
 	@Override
 	public void map(String blob, String line ) {

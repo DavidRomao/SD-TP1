@@ -79,7 +79,7 @@ public class Multicast {
                     replies.add(new String(datagram.getData(), 0, datagram.getLength()));
                 }catch (SocketTimeoutException e){
                     socket.send( request ) ;
-                    ntries++;
+                    ntries+=1;
 //            System.out.println("All replies received");
                 }
             }

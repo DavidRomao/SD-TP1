@@ -1,16 +1,21 @@
 package servidor.storage;
 
+import api.storage.BlobStorage;
 import api.storage.Datanode;
+import api.storage.Namenode;
+import sys.mapreduce.Jobs;
+import sys.mapreduce.JsonBlobWriter;
 import sys.mapreduce.MapReducer;
-import sys.storage.NamenodeClient;
+import sys.storage.BlobStorageClient;
+import utils.Base58;
+import utils.JSON;
 import utils.Random;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.net.URI;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -21,27 +26,37 @@ import java.util.concurrent.ConcurrentMap;
 public class DatanodeServer implements Datanode {
 
 	public static final int WaitingTime = 20 * 1000;
-	private String base_uri;
+    private final URI uri;
+    private String base_uri;
 	private ConcurrentMap<String,Long> unverifiedBlocksTime = new ConcurrentHashMap<>();
 	private ConcurrentMap<String,String> unverifiedBlocksBlobname = new ConcurrentHashMap<>();
+	private BlobStorage storage;
 
-	@SuppressWarnings("InfiniteLoopStatement")
+    private String MapOutputBlobNameFormat;
+
+
+    @SuppressWarnings("InfiniteLoopStatement")
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
-
 		// Garbage Collector
 		// Launch the thread
-		garbageCollectorLauncher();
-	}
+//		garbageCollectorLauncher();
+        this.uri = URI.create(base_uri);
+
+
+
+    }
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	private void garbageCollectorLauncher(){
 		new Thread( () -> {
-			NamenodeClient namenodeClient = new NamenodeClient();
+			storage = new BlobStorageClient();
+			Namenode namenodeClient = storage.getNamenode();
 			while (true) {
 				try {
-					unverifiedBlocksTime.forEach((key, time) -> {
+                    Thread.sleep(WaitingTime);
+                    unverifiedBlocksTime.forEach((key, time) -> {
 						// if the block is old enough
 						if (System.currentTimeMillis() - time > WaitingTime) {
 							String name = unverifiedBlocksBlobname.get(key);
@@ -63,7 +78,6 @@ public class DatanodeServer implements Datanode {
 						}
 
 					});
-					Thread.sleep(WaitingTime);
 				} catch (InterruptedException e) {
 					System.out.println("Thread Sleep interrupted");
 				}
@@ -120,6 +134,7 @@ public class DatanodeServer implements Datanode {
 			in.close();
 			return blob;
 		}catch(IOException e) {
+            System.out.println(e.getCause());
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
@@ -128,29 +143,49 @@ public class DatanodeServer implements Datanode {
 		// remove blocks from the unverified blocks list
 		blocks.forEach( block -> unverifiedBlocksTime.remove(block) );
 	}
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void mapper(MapReducer job, String block, String outputPrefix) {
-		
-		
-		//new MapperTask("Datanode", storage, jobClassBlob, inputPrefix, outputPrefix).execute();
-		List results = new LinkedList<LinkedHashMap<Object, Object>>();
-		job.setYielder( (key,val) -> results.add(new LinkedHashMap<>().put(key, val)));
-		
-		job.map_init();
-		String[] lines = new String(readBlock(block)).split("\n");
-		for(int i=0;lines[i]!= null;i++) {
-			System.out.println(lines[i]);
-			job.map( block, lines[i] );
-		}
 
-		job.map_end();
-		
-	}
-	
+    @SuppressWarnings("unchecked")
 	@Override
-	public void reducer(MapReducer job, String inputPrefix , String outputPrefix, int outPartitionSize) {
+	public void mapper(String jobClassBlob, String blob, List<String> blocks, String outputPrefix) {
+        MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
+        System.err.println("Map method invoked");
+        MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
+
+        job.setYielder( (key,val) -> jsonValueWriterFor( key ).write(val));
+
+        job.map_init();
+
+        for (String block : blocks) {
+            for (String line : new String(readBlock(block)).split("\\n")  ) {
+                job.map(blob, line);
+            }
+
+        }
+
+        job.map_end();
+
+        writers.values().forEach( JsonBlobWriter::close );
+        writers.clear();
+
+
+	}
+
+
+    private Map<Object, JsonBlobWriter> writers = new ConcurrentHashMap<>();
+
+    private JsonBlobWriter jsonValueWriterFor(Object key ) {
+        JsonBlobWriter res = writers.get( key );
+        if( res == null ) {
+            String b58key = Base58.encode( JSON.encode( key ) );
+            BlobStorage.BlobWriter out = storage.blobWriter( String.format(MapOutputBlobNameFormat, b58key));
+            writers.put(key,  new JsonBlobWriter(out));
+        }
+        return writers.get(key);
+    }
+
+
+    @Override
+	public void reducer(String job, String inputPrefix , String outputPrefix, int outPartitionSize) {
 		/*
 		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
 				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))

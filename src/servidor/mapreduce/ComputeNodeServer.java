@@ -37,13 +37,14 @@ public class ComputeNodeServer implements ComputeNode{
         //does nothing, just placeholder
         System.err.println("ComputeNode Server ready at " + URI_BASE );
         Endpoint.publish(URI_BASE,new ComputeNodeServer());
-
     }
 
 
     @Override
-    public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
-
+    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
+        if (jobClassBlob == null || inputPrefix== null ||  outputPrefix == null || outPartSize < 0 ) {
+            throw new InvalidArgumentException();
+        }
     	BlobStorage storage = new BlobStorageClient() ;
         Namenode namenode = storage.getNamenode();
 		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
@@ -58,8 +59,9 @@ public class ComputeNodeServer implements ComputeNode{
     	String ip = ip_path.split("/")[0];
     	URI uri = URI.create("http://" + ip + "/datanode");
     	DatanodeClient client = new DatanodeClient(uri);
-    	client.mapper(job, inputPrefix, outputPrefix);
-    	client.reducer(job, inputPrefix, outputPrefix, outPartSize);
+    	return true;
+//    	client.mapper(job, inputPrefix, outputPrefix);
+//    	client.reducer(job, inputPrefix, outputPrefix, outPartSize);
 
 
     	/*Map<String,List<String>> blocksByDatanode = new HashMap<>();

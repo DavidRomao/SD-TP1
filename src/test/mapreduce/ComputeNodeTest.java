@@ -53,13 +53,13 @@ public class ComputeNodeTest {
 
         // Get the webservices SOAP class
         QName QNAME = new QName(ComputeNode.NAMESPACE, ComputeNode.NAME);
-        Service service = Service.create( new URL("http://localhost:3333/mapreduce/?wsdl"), QNAME);
-        ComputeNode datanode = service.getPort( ComputeNode.class );
-        System.out.println(  datanode.getClass() );
+        Service service = Service.create( new URL("http://127.0.1.1:3333/mapreduce/?wsdl"), QNAME);
+        ComputeNode computeNode = service.getPort( ComputeNode.class );
+        System.out.println(  computeNode.getClass() );
 
         //7. Perform the WordCount computation, over the two blobs named "doc-*"
         //   on the servidor
-        datanode.mapReduce("WordCount","doc-",outputBlob,MAX_PARTITION_SIZE);
+        computeNode.mapReduce("WordCount","doc-",outputBlob,MAX_PARTITION_SIZE);
 
         //8. Check the results. The results will be written in one of more partitions of the given maximum size.
         storage.listBlobs(outputBlob).stream().forEach( blob -> {
