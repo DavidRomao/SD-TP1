@@ -16,13 +16,9 @@ import java.util.NoSuchElementException;
  *
  * Namenode via REST
  */
-@SuppressWarnings("deprecation")
 public class NamenodeClient implements Namenode {
 
     private static final String NAMENODE = "Namenode";
-
-//    Trie<String, List<String>> names = new PatriciaTrie<>();
-
 	private WebTarget target;
 	public NamenodeClient() {
         Multicast multicast = new Multicast();
@@ -33,7 +29,6 @@ public class NamenodeClient implements Namenode {
             target = client.target(UriBuilder.fromUri(namenodeURI + "namenode"));
         }catch (NoSuchElementException e){
             System.err.println("No namenodes available");
-            System.exit(0);
         }
     }
 

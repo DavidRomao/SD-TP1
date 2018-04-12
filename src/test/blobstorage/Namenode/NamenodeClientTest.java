@@ -2,7 +2,6 @@ package test.blobstorage.Namenode;
 
 import org.junit.jupiter.api.Test;
 import sys.storage.NamenodeClient;
-import utils.Random;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,8 @@ import java.util.List;
 
 class NamenodeClientTest {
 
+    public static void main(String[] args) {
+    }
     @Test
     void list() {
         NamenodeClient client = new NamenodeClient();
@@ -26,16 +27,16 @@ class NamenodeClientTest {
 //        assertEquals(endolas,blocks);
     }
     @Test
-    void create_read() {
+    void create_read() throws InterruptedException {
         NamenodeClient client = new NamenodeClient();
         List<String> blocks = new ArrayList<>(100);
-        for (int i = 0; i < 10; i++) {
-            blocks.add("Strings for test are endless");
+        blocks.add("http://localhost:9999/datanode/");
+        for (int i = 0; i < 100; i++) {
+            System.out.println("Blob " + i + "/"+100);
+            client.create("blobname"+i,blocks);
+            Thread.sleep(20);
         }
-        for (int i = 0; i < 10000; i++) {
-            client.create(Random.key64(),blocks);
-        }
-
+        System.out.printf("size %d ", client.list("").size());
         //        assertEquals(endless,blocks);
     }
 

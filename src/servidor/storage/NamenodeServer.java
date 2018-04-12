@@ -1,5 +1,6 @@
 package servidor.storage;
 
+import api.storage.Datanode;
 import api.storage.Namenode;
 import sys.storage.DatanodeClient;
 
@@ -61,13 +62,18 @@ public class NamenodeServer implements Namenode {
         else if (nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
         else {
+            for (String block : blocks) {
+                // if blocks uri are not valid            System.out.println(in.nextLine().trim().matches("http://\\w+:*\\d*/datanode/\\w+"));
+                if (!block.matches("http://\\w+:*\\d*/datanode/\\w+"))
+                    throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
             nametable.put(name,blocks);
             // validate the blocks stored on the datanodes, to prove they are not forgotten
             // as each blob is only stored in a datanode we can send the complete list just to one datanode
             // http://0.0.0.0:9999/datanode/blockid
             // http://0.0.0.0:9999 is at [0
             String ip_port = blocks.get(0).split("datanode")[0];
-            new DatanodeClient(URI.create(ip_port)).confirmBlocks(blocks);
+            new DatanodeClient(URI.create(ip_port+ Datanode.PATH)).confirmBlocks(blocks);
         }
 //        blocks.forEach(System.err::println);
         System.err.println("Current number of blobs stored " + nametable.size());
@@ -89,17 +95,15 @@ public class NamenodeServer implements Namenode {
     public void delete(String prefix) {
         System.out.println("NamenodeServer.delete");
         int i = 0;
-        String [] toDelete = new String[nametable.size()];
         for (String s : nametable.keySet()) {
             if (s.startsWith(prefix)){
-                toDelete[i++]=s;
+                nametable.remove(s);
+                i++;
             }
-        }
-        for (int j = 0; j < i; j++) {
-            nametable.remove(toDelete[j]);
         }
         if (i == 0)throw new WebApplicationException(Response.Status.NOT_FOUND);
         else throw new WebApplicationException(Response.Status.NO_CONTENT);
+        // todo confirm delete
     }
 
     @Override

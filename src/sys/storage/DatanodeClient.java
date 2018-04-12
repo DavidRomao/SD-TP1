@@ -6,7 +6,10 @@ import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
 import utils.JSON;
 
-import javax.ws.rs.client.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -32,7 +35,6 @@ public class DatanodeClient implements Datanode {
 	
 	private Map<String, byte[]> blocks = new HashMap<>(INITIAL_SIZE);
 	private WebTarget target;
-	private BlobStorage storage;
 
 	public DatanodeClient(URI datanodeURI) {
 		Client client = ClientBuilder.newClient(new ClientConfig());
@@ -40,7 +42,6 @@ public class DatanodeClient implements Datanode {
 		target = client.target(datanodeURI);
 	}
 	public DatanodeClient(URI datanodeURI, BlobStorage storage) {
-		this.storage = storage;
 		Client client = ClientBuilder.newClient(new ClientConfig());
 		target = client.target(datanodeURI);
 
@@ -62,7 +63,7 @@ public class DatanodeClient implements Datanode {
 	 */
 	@Override
 	public void deleteBlock(String block) {
-		Response response = RestRequests.makeDelete(target.path(block).request());
+		RestRequests.makeDelete(target.path(block).request());
 //		System.out.println("DatanodeClient.deleteBlock");
 //		System.out.println(response.getStatus());
 	}
@@ -80,8 +81,13 @@ public class DatanodeClient implements Datanode {
 
     @Override
 	public void confirmBlocks(List<String> blocks) {
-        Response response = RestRequests.makePost(target.path("/validate").request()
+        RestRequests.makePost(target.path("/validate").request()
                             ,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
+	}
+
+	@Override
+	public void confirmDeletion(List<String> blocks) {
+		//todo
 	}
 
 	@Override

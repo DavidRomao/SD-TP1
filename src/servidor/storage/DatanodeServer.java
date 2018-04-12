@@ -16,7 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,27 +27,30 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DatanodeServer implements Datanode {
 
-	public static final int WaitingTime = 20 * 1000;
+	private static final int WaitingTime = 10 * 1000;
     private final URI uri;
     private String base_uri;
-	private ConcurrentMap<String,Long> unverifiedBlocksTime = new ConcurrentHashMap<>();
-	private ConcurrentMap<String,String> unverifiedBlocksBlobname = new ConcurrentHashMap<>();
+	private ConcurrentMap<String,DataSet> unverifiedBlocks = new ConcurrentHashMap<>();
 	private BlobStorage storage;
-
     private String MapOutputBlobNameFormat;
 
+	class DataSet{
+		long time;
+		String name;
 
+		public DataSet(long time, String name) {
+			this.time = time;
+			this.name = name;
+		}
+	}
     @SuppressWarnings("InfiniteLoopStatement")
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
 		// Garbage Collector
 		// Launch the thread
-//		garbageCollectorLauncher();
+		garbageCollectorLauncher();
         this.uri = URI.create(base_uri);
-
-
-
     }
 
 	@SuppressWarnings("InfiniteLoopStatement")
@@ -57,19 +61,18 @@ public class DatanodeServer implements Datanode {
 			while (true) {
 				try {
                     Thread.sleep(WaitingTime);
-                    unverifiedBlocksTime.forEach((key, time) -> {
+                    unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
-						if (System.currentTimeMillis() - time > WaitingTime) {
-							String name = unverifiedBlocksBlobname.get(key);
+						if ( System.currentTimeMillis() - data.time > WaitingTime) {
+							String name = data.name;
 							// if when the block was created a blob name was sent too
 							if (name != null) {
 								// if it's a lost block
 								if (!namenodeClient.exists(name, key)) {
-									unverifiedBlocksBlobname.remove(key);
-									unverifiedBlocksTime.remove(key);
+									unverifiedBlocks.remove(key);
 									new File(key).delete();
 								}
-							} else // delete the block
+							} else
 							{
 								// if a blob name was not provided when the block was created ,
 								// perform a deep search on the namenode to try and find the block
@@ -85,6 +88,10 @@ public class DatanodeServer implements Datanode {
 			}
 		}).start();
 	}
+
+	private  void put(ConcurrentMap<String, DataSet> unverifiedBlocks, String id, long l,String name){
+		unverifiedBlocks.put(id, new DataSet(l,name));
+	}
 	@Override
 	public String createBlock(byte[] data, String blobName){
 
@@ -95,11 +102,13 @@ public class DatanodeServer implements Datanode {
 			out.write(data);
 			out.close();
 			System.out.printf("block created : %s/%s\n", base_uri, id);
-			unverifiedBlocksTime.put(id,System.currentTimeMillis());
 			if (blobName != null) {
-				unverifiedBlocksBlobname.put(id,blobName);
+				put(unverifiedBlocks,id,System.currentTimeMillis(),blobName );
+			}else
+				put(unverifiedBlocks,id,System.currentTimeMillis(),null);
+			{
+				return base_uri + "/" + id;
 			}
-			return base_uri + "/" + id;
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");
@@ -135,14 +144,19 @@ public class DatanodeServer implements Datanode {
 			in.close();
 			return blob;
 		}catch(IOException e) {
-            System.out.println(e.getCause());
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
 	@Override
 	public void confirmBlocks(List<String> blocks) {
+		System.out.println("Received Confirmations");
 		// remove blocks from the unverified blocks list
-		blocks.forEach( block -> unverifiedBlocksTime.remove(block) );
+		blocks.forEach( block -> unverifiedBlocks.remove(block) );
+	}
+
+	@Override
+	public void confirmDeletion(List<String> blocks) {
+		//todo
 	}
 
 	@Path("/map")
