@@ -3,7 +3,6 @@ package sys.storage;
 import api.RestRequests;
 import api.multicast.Multicast;
 import api.storage.Namenode;
-import com.google.gson.Gson;
 import org.glassfish.jersey.client.ClientConfig;
 
 import javax.ws.rs.client.*;
@@ -21,14 +20,12 @@ import java.util.NoSuchElementException;
 public class NamenodeClient implements Namenode {
 
     private static final String NAMENODE = "Namenode";
-	private Gson gson;
 
 //    Trie<String, List<String>> names = new PatriciaTrie<>();
 
 	private WebTarget target;
 	public NamenodeClient() {
         Multicast multicast = new Multicast();
-        gson = new Gson();
         try {
             String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
             System.err.println("Namenode discovered at " + namenodeURI);
@@ -45,8 +42,7 @@ public class NamenodeClient implements Namenode {
 	public List<String> list(String prefix) {
 	    //todo find out how query params work
         Invocation.Builder request = target.path("list").queryParam("prefix",prefix).request(MediaType.APPLICATION_JSON);
-        byte[] data = RestRequests.makeGet(request, byte[].class);
-        List<String> list = gson.fromJson(new String(data), List.class);
+        List<String> list = RestRequests.makeGet(request,List.class);
         System.err.printf("Received list with %d blobs for prefix |%s|\n", list.size(), prefix);
         return list;
 	}
@@ -61,7 +57,7 @@ public class NamenodeClient implements Namenode {
         System.err.println(path.getUri());
 
 //        Response post = path.request(MediaType.APPLICATION_JSON).post(Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
-        Response post = RestRequests.makePost(path.request(MediaType.APPLICATION_JSON), Entity.entity( gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        Response post = RestRequests.makePost(path.request(MediaType.APPLICATION_JSON), Entity.entity( blocks, MediaType.APPLICATION_JSON));
         System.err.println("post = " + post.getStatus());
 
 
@@ -77,27 +73,31 @@ public class NamenodeClient implements Namenode {
     @Override
 	public void update(String name, List<String> blocks) {
         WebTarget path = target.path(name);
-        RestRequests.makePut(path.request(),Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        RestRequests.makePut(path.request(),Entity.entity(blocks, MediaType.APPLICATION_JSON));
     }
 
     @SuppressWarnings("unchecked")
     @Override
 	public List<String> read(String name) {
-        byte[] bytes = RestRequests.makeGet( target.path(name).request(), ( byte[].class) );
-        return gson.fromJson( new String(bytes), List.class);
+//        byte[] bytes = RestRequests.makeGet( target.path(name).request(), ( byte[].class) );
+//        return gson.fromJson( new String(bytes), List.class);
+        return ((List<String>) RestRequests.makeGet(target.path(name).request(), (List.class)));
+//        return gson.fromJson( new String(bytes), List.class);
     }
 
 
     @Override
     public boolean exists(String name, String block) {
         WebTarget path = target.path(String.format("/checkBlock/%s/%s", name, block));
-        return RestRequests.makeGet(path.request(), Boolean.class);
+        Boolean aBoolean = RestRequests.makeGet(path.request(), Boolean.class);
+        return aBoolean != null ? aBoolean : true;
     }
 
     @Override
     public boolean exists(String block) {
         WebTarget path = target.path(String.format("/checkBlock/%s", block));
-        return RestRequests.makeGet(path.request(), Boolean.class);
+        Boolean aBoolean = RestRequests.makeGet(path.request(), Boolean.class);
+        return aBoolean != null ? aBoolean : true;
     }
 
 
