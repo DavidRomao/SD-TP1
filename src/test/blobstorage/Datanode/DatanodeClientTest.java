@@ -64,7 +64,7 @@ public class DatanodeClientTest {
         DatanodeClient client = new DatanodeClient(URI.create("http://localhost:9999/datanode"));
 
 
-        client.mapper(Jobs.newJobInstance(storage,"WordCount").instance,"doc-1",storage.getNamenode().list("doc"),"testOut-");
+        client.mapper(storage.getNamenode().list("doc"),"WordCount","doc-1","testOut-");
     }
     public static void main(String[] args) throws IOException {
 //    	createBlock();

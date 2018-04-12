@@ -26,7 +26,8 @@ public class ComputeNodeTest {
         
         //1. Get the storage implementation. Replace with your own implementation...
         BlobStorage storage = new BlobStorageClient();
-        
+
+
         //2. Copy all lines of WordCount.java to a blob named WordCount.
         BlobStorage.BlobWriter src = storage.blobWriter("WordCount");
         Files.readAllLines(new File("WordCount.java").toPath())
@@ -39,6 +40,9 @@ public class ComputeNodeTest {
             Files.readAllLines(new File(doc + ".txt").toPath()).stream().forEach( out::writeLine );
             out.close();
         }
+
+
+
         //4. Check the contents of the doc-X files are in storage.
         storage.listBlobs("doc-").stream().forEach( blob -> {
             storage.readBlob(blob).forEach( System.out::println );
@@ -56,17 +60,17 @@ public class ComputeNodeTest {
         Service service = Service.create( new URL("http://127.0.1.1:3333/mapreduce/?wsdl"), QNAME);
         ComputeNode computeNode = service.getPort( ComputeNode.class );
         System.out.println(  computeNode.getClass() );
-
         //7. Perform the WordCount computation, over the two blobs named "doc-*"
         //   on the servidor
         computeNode.mapReduce("WordCount","doc-",outputBlob,MAX_PARTITION_SIZE);
 
+        /*
         //8. Check the results. The results will be written in one of more partitions of the given maximum size.
         storage.listBlobs(outputBlob).stream().forEach( blob -> {
             //Print this partition blob name.
             System.out.println(blob);
             storage.readBlob(blob).forEach( System.out::println );
         });
-        
+  */
     }
 }

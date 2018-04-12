@@ -11,7 +11,8 @@ import utils.Base58;
 import utils.JSON;
 import utils.Random;
 
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.URI;
@@ -144,12 +145,20 @@ public class DatanodeServer implements Datanode {
 		blocks.forEach( block -> unverifiedBlocksTime.remove(block) );
 	}
 
+	@Path("/map")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public void mapper(List<String>blocks, @QueryParam("test") String test){
+		System.out.println(test);
+	}
     @SuppressWarnings("unchecked")
 	@Override
-	public void mapper(String jobClassBlob, String blob, List<String> blocks, String outputPrefix) {
+	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix) {
         MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
         System.err.println("Map method invoked");
-        MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
+        if (storage == null)
+			storage = new BlobStorageClient();
+		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
 
         job.setYielder( (key,val) -> jsonValueWriterFor( key ).write(val));
 

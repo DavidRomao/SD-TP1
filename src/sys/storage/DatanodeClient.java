@@ -4,6 +4,7 @@ import api.RestRequests;
 import api.storage.BlobStorage;
 import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
+import utils.JSON;
 
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
@@ -35,7 +36,8 @@ public class DatanodeClient implements Datanode {
 
 	public DatanodeClient(URI datanodeURI) {
 		Client client = ClientBuilder.newClient(new ClientConfig());
-		target = client.target(datanodeURI);
+		System.err.println("Connecting to datanode at " + datanodeURI );
+		target = client.target(datanodeURI + Datanode.PATH);
 	}
 	public DatanodeClient(URI datanodeURI, BlobStorage storage) {
 		this.storage = storage;
@@ -82,11 +84,13 @@ public class DatanodeClient implements Datanode {
 	}
 
 	@Override
-	public void mapper(String jobClass, String blob, List<String> blocks, String outputPrefix) {
-		Response response = target.path("/mapper").queryParam("blob").
+	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix) {
+		Response response = target.path("/datanode/mapper").
+				queryParam("jobClass",jobClass).
+				queryParam("blob",blob).
 				queryParam("outputPrefix", outputPrefix).
 				request().
-				post(Entity.entity(jobClass, MediaType.APPLICATION_JSON));
+				post(Entity.entity(JSON.encode(blocks), MediaType.APPLICATION_JSON));
 		//Response path = makePost(target.path("/mapper").request()
 		//				 	,Entity.entity(entity, mediaType));
 		System.out.println("Mapper Status: " + response.getStatus());
