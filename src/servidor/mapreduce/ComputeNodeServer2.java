@@ -2,6 +2,7 @@ package servidor.mapreduce;
 
 import api.mapreduce.ComputeNode;
 import api.storage.BlobStorage;
+import api.storage.Datanode;
 import api.storage.Namenode;
 import sys.mapreduce.Jobs;
 import sys.mapreduce.MapReduceEngine;
@@ -39,7 +40,7 @@ public class ComputeNodeServer2 implements ComputeNode {
             if (datanodeClient != null)
                 datanodeClient.mapper( blocks,jobClassBlob,s, outputPrefix );
             else {
-                datanodeClient = new DatanodeClient(URI.create(uri),storage);
+                datanodeClient = new DatanodeClient(URI.create(uri+Datanode.PATH),storage);
                 System.out.println("Calling mapper on " + s);
                 datanodeClient.mapper( blocks , jobClassBlob,s, outputPrefix );
                 datanodeClientMap.put(uri,datanodeClient);

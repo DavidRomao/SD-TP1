@@ -165,6 +165,7 @@ public class DatanodeServer implements Datanode {
         job.map_init();
 
         for (String block : blocks) {
+        	block = block.split("datanode/")[1];
             for (String line : new String(readBlock(block)).split("\\n")  ) {
                 job.map(blob, line);
             }

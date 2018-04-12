@@ -37,12 +37,13 @@ public class DatanodeClient implements Datanode {
 	public DatanodeClient(URI datanodeURI) {
 		Client client = ClientBuilder.newClient(new ClientConfig());
 		System.err.println("Connecting to datanode at " + datanodeURI );
-		target = client.target(datanodeURI + Datanode.PATH);
+		target = client.target(datanodeURI);
 	}
 	public DatanodeClient(URI datanodeURI, BlobStorage storage) {
 		this.storage = storage;
 		Client client = ClientBuilder.newClient(new ClientConfig());
 		target = client.target(datanodeURI);
+
 	}
 
 	/**
@@ -85,7 +86,7 @@ public class DatanodeClient implements Datanode {
 
 	@Override
 	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix) {
-		Response response = target.path("/datanode/mapper").
+		Response response = target.path("/mapper").
 				queryParam("jobClass",jobClass).
 				queryParam("blob",blob).
 				queryParam("outputPrefix", outputPrefix).

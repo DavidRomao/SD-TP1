@@ -6,6 +6,7 @@ import api.storage.Namenode;
 import sys.storage.io.BufferedBlobReader;
 import sys.storage.io.BufferedBlobWriter;
 
+import javax.xml.crypto.Data;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,7 +35,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
         Set<String> send = multicast.send("Datanode".getBytes(), 500);
         for (String s : send) {
             System.err.println(s);
-            URI uri = URI.create(s + "datanode");
+            URI uri = URI.create(s + Datanode.PATH);
             datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri ));
         }
     }
