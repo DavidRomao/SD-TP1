@@ -31,7 +31,7 @@ public class ComputeNodeServer2 implements ComputeNode {
     @Override
     public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
         System.out.println("ComputeNodeServer2.mapReduce");
-
+        /*
         for (String s : namenode.list(inputPrefix)) {
             List<String> blocks = namenode.read(s);
             String uri = blocks.get(0).split("datanode")[0];
@@ -42,15 +42,17 @@ public class ComputeNodeServer2 implements ComputeNode {
             }else {
                 datanodeClient = new DatanodeClient(URI.create(uri+Datanode.PATH),storage);
                 System.out.println("Calling mapper on " + s);
-                datanodeClient.mapper( blocks , jobClassBlob,s, outputPrefix );
+                datanodeClient.mapper(jobClassBlob,s, outputPrefix );
                 datanodeClientMap.put(uri,datanodeClient);
             }
-        }
-        datanodeClientMap.values().iterator().next().reducer(jobClassBlob, outputPrefix, outPartSize);
-        return true;
-//        MapReduceEngine engine = new MapReduceEngine("worker",storage);
-//        engine.executeJob( jobClassBlob,inputPrefix,outputPrefix,outPartSize);
+        }*/
+        List<String> blocks = namenode.read(namenode.list(inputPrefix).get(0));
+        String uri = blocks.get(0).split("datanode")[0];
 
+        DatanodeClient datanodeClient = new DatanodeClient(URI.create(uri+Datanode.PATH));
+        datanodeClient.mapper(jobClassBlob, inputPrefix, outputPrefix);
+        datanodeClient.reducer(jobClassBlob, outputPrefix, outPartSize);
+        return true;
     }
 
 

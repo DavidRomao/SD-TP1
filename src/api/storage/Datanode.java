@@ -33,8 +33,7 @@ public interface Datanode {
 	
 	@POST
 	@Path("/mapper")
-	@Consumes(MediaType.APPLICATION_JSON)
-	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob, @QueryParam("outputPrefix") String outputPrefix);
+	void mapper( @QueryParam("jobClass")String jobClass, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix);
 
 
     @POST

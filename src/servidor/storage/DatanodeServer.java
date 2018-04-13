@@ -159,7 +159,7 @@ public class DatanodeServer implements Datanode {
 	
     @SuppressWarnings("unchecked")
 	@Override
-	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix) {
+	public void mapper(String jobClassBlob, String inputPrefix,  String outputPrefix) {
         MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
         System.err.println("Map method invoked");
         if(storage == null) {
@@ -171,13 +171,22 @@ public class DatanodeServer implements Datanode {
 
         job.map_init();
 
+        //List<String> blocks = storage.listBlobs(inputPrefix);
+        
+		storage.listBlobs( inputPrefix ).stream()
+		.forEach( blob -> {
+				storage.readBlob( blob ).forEach( line -> job.map( blob, line ) );
+		});
+
+        
+        /*
         for (String block : blocks) {
         	block = block.split("datanode/")[1];
             for (String line : new String(readBlock(block)).split("\\n")  ) {
                 job.map(blob, line);
             }
 
-        }
+        }*/
 
         job.map_end();
 
@@ -203,10 +212,10 @@ public class DatanodeServer implements Datanode {
 
     @Override
 	public void reducer(String jobClassBlob, String outputPrefix, int outPartitionSize) {
-    	System.out.println(outPartitionSize);
     	if(storage == null) {
     		storage = new BlobStorageClient();
     	}
+    	String worker = uri.getHost()+":"+ uri.getPort();
     	storage.listBlobs(outputPrefix + "-map-").stream().forEach( blob -> System.out.println(blob));
 		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
 				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
@@ -220,7 +229,7 @@ public class DatanodeServer implements Datanode {
 					BlobWriter writer = storage.blobWriter(partitionOutputBlob);
 					
 					partitionKeyList.forEach( keyPrefix -> {
-						new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
+						new ReducerTask(worker, storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
 					});			
 					
 					writer.close();

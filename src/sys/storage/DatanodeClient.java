@@ -88,13 +88,13 @@ public class DatanodeClient implements Datanode {
 	}
     
 	@Override
-	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix) {
+	public void mapper(String jobClass, String inputPrefix, String outputPrefix) {
 		Response response = target.path("/mapper").
 				queryParam("jobClass",jobClass).
-				queryParam("blob",blob).
+				queryParam("inputPrefix",inputPrefix).
 				queryParam("outputPrefix", outputPrefix).
 				request().
-				post(Entity.entity(JSON.encode(blocks), MediaType.APPLICATION_JSON));
+				post(null);
 		//Response path = makePost(target.path("/mapper").request()
 		//				 	,Entity.entity(entity, mediaType));
 		System.out.println("Mapper Status: " + response.getStatus());
