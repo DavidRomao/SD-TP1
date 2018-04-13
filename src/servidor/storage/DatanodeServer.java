@@ -1,10 +1,8 @@
 package servidor.storage;
 
 import api.storage.BlobStorage;
-import api.storage.BlobStorage.BlobWriter;
 import api.storage.Datanode;
 import api.storage.Namenode;
-import jersey.repackaged.com.google.common.collect.Lists;
 import sys.mapreduce.Jobs;
 import sys.mapreduce.JsonBlobWriter;
 import sys.mapreduce.MapReducer;
@@ -14,16 +12,14 @@ import utils.Base58;
 import utils.JSON;
 import utils.Random;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.URI;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * @author Cláudio Pereira 47942
@@ -150,17 +146,10 @@ public class DatanodeServer implements Datanode {
 		blocks.forEach( block -> unverifiedBlocksTime.remove(block) );
 	}
 
-	@Path("/map")
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void mapper(List<String>blocks, @QueryParam("test") String test){
-		System.out.println(test);
-	}
-	
     @SuppressWarnings("unchecked")
 	@Override
-	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix) {
-        MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
+	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix,String worker) {
+        MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + worker;
         System.err.println("Map method invoked");
         if(storage == null) {
         	storage = new BlobStorageClient();
@@ -176,7 +165,6 @@ public class DatanodeServer implements Datanode {
             for (String line : new String(readBlock(block)).split("\\n")  ) {
                 job.map(blob, line);
             }
-
         }
 
         job.map_end();
@@ -202,29 +190,18 @@ public class DatanodeServer implements Datanode {
 
 
     @Override
-	public void reducer(String jobClassBlob, String outputPrefix, int outPartitionSize) {
+	public void reducer(String inputPrefix,String jobClassBlob, String outputPrefix, int outPartitionSize,int partitionCounter) {
     	System.out.println(outPartitionSize);
     	if(storage == null) {
     		storage = new BlobStorageClient();
     	}
-    	storage.listBlobs(outputPrefix + "-map-").stream().forEach( blob -> System.out.println(blob));
-		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
-				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
-				.collect( Collectors.toSet() );
-				
-		AtomicInteger partitionCounter = new AtomicInteger(0);
-		Lists.partition( new ArrayList<>( reduceKeyPrefixes), outPartitionSize).forEach(partitionKeyList -> {
-					
-					String partitionOutputBlob = String.format("%s-part%04d", outputPrefix, partitionCounter.incrementAndGet());
-					
-					BlobWriter writer = storage.blobWriter(partitionOutputBlob);
-					
-					partitionKeyList.forEach( keyPrefix -> {
-						new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
-					});			
-					
-					writer.close();
-				});
+		String partitionOutputBlob = String.format("%s-part%04d", outputPrefix,partitionCounter);
+
+		BlobStorage.BlobWriter writer = storage.blobWriter(partitionOutputBlob);
+
+    	new ReducerTask("reducer",storage,jobClassBlob,inputPrefix,outputPrefix)
+				.execute(writer);
+
 	}
 }
 

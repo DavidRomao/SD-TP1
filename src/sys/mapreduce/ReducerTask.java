@@ -36,5 +36,6 @@ public class ReducerTask extends MapReduceTask {
 		job.instance.reduce_end();
 
 		storage.deleteBlobs(inputPrefix);
+		writer.close();
 	}
 }

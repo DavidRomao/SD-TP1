@@ -1,7 +1,6 @@
 package test.blobstorage.Datanode;
 
 import api.storage.BlobStorage;
-import sys.mapreduce.Jobs;
 import sys.storage.BlobStorageClient;
 import sys.storage.DatanodeClient;
 
@@ -61,10 +60,8 @@ public class DatanodeClientTest {
             Files.readAllLines(new File(doc + ".txt").toPath()).stream().forEach( out::writeLine );
             out.close();
         }
-        DatanodeClient client = new DatanodeClient(URI.create("http://localhost:9999/datanode"));
 
 
-        client.mapper(storage.getNamenode().list("doc"),"WordCount","doc-1","testOut-");
     }
     public static void main(String[] args) throws IOException {
 //    	createBlock();

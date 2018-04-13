@@ -101,7 +101,8 @@ public class NamenodeServer implements Namenode {
         if (i == 0)throw new WebApplicationException(Response.Status.NOT_FOUND);
         else throw new WebApplicationException(Response.Status.NO_CONTENT);
     }
-
+//["results-1qgl67eec-map-SZE8L-192.168.1.15:9999","results-1qgl67eec-map-SZE8L-192.168.1.15:10000"]
+//http://192.168.1.15:10000/datanode/1r83dfj83 http://192.168.1.15:10000/datanode/1qpu4pk0i
     @Override
     public boolean exists(String name, String block) {
         try{

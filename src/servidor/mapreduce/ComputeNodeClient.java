@@ -3,10 +3,12 @@ package servidor.mapreduce;
 import api.mapreduce.ComputeNode;
 import api.mapreduce.ComputeNode.InvalidArgumentException;
 
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 //import api.ws.*;
-import java.net.*;
-import javax.xml.ws.*;
-import javax.xml.namespace.*;
 
 /**
  * @author Cláudio Pereira 47942
@@ -18,8 +20,8 @@ public class ComputeNodeClient {
 	
 	public ComputeNodeClient() throws MalformedURLException {
 		QName QNAME = new QName(ComputeNode.NAMESPACE, ComputeNode.NAME);
-		Service service = Service.create( new URL("http://0.0.0.0:3333/mapreduce/?wsdl"), QNAME);
-		ComputeNode computeNode = service.getPort( ComputeNode.class );
+		Service service = Service.create( new URL("http://192.168.1.15:3333/mapreduce/?wsdl"), QNAME);
+		computeNode = service.getPort( ComputeNode.class );
 		System.out.println(  computeNode.getClass());
 
 	}

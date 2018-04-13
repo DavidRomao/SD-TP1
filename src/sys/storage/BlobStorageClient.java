@@ -6,9 +6,10 @@ import api.storage.Namenode;
 import sys.storage.io.BufferedBlobReader;
 import sys.storage.io.BufferedBlobWriter;
 
-import javax.xml.crypto.Data;
 import java.net.URI;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -38,6 +39,12 @@ public class BlobStorageClient implements api.storage.BlobStorage{
             URI uri = URI.create(s + Datanode.PATH);
             datanodes.put(String.format("%s:%s",uri.getHost(),uri.getPort()),new DatanodeClient(uri ));
         }
+        System.err.printf("Found %d datanodes\n",datanodes.size());
+
+    }
+    @Override
+    public Iterator<Datanode> getDatanodesIterator() {
+        return datanodesIterator;
     }
 
     @Override
@@ -55,9 +62,9 @@ public class BlobStorageClient implements api.storage.BlobStorage{
                 URI uri = URI.create(s);
                 String host = uri.getHost();
                 Datanode datanode = datanodes.get(String.format("%s:%s",host,uri.getPort()));
+                // path -> /datanode/block
                 String id = uri.getPath().split("/")[2];
                 datanode.deleteBlock(id);
-
             });
         }
         namenode.delete(prefix);
@@ -65,7 +72,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
 
     @Override
     public BlobReader readBlob(String name) {
-        System.err.println("BlobStorageClient.readBlob");
+//        System.err.println("BlobStorageClient.readBlob");
         return new BufferedBlobReader(name,namenode,datanodes);
     }
 
@@ -80,13 +87,5 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     public Namenode getNamenode() {
         return namenode;
     }
-    /*
-    //TODO: Just commented to assure this is the right path
-	@Override
-	public void MapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) {
-		// TODO For Now It doesn't actually call the MapReduce method
-		datanodes.values().forEach(datanode ->{
-			datanode.mapReduce(jobClassBlob, inputPrefix, outputPrefix, outPartSize);
-		});;
-	}*/
+
 }

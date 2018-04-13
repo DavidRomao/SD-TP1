@@ -34,10 +34,16 @@ public interface Datanode {
 	@POST
 	@Path("/mapper")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob, @QueryParam("outputPrefix") String outputPrefix);
+	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob,
+				 					  @QueryParam("outputPrefix") String outputPrefix,@QueryParam("worker") String worker);
 
 
     @POST
 	@Path("/reducer")
-	void reducer(@QueryParam("jobClass") String jobClass, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outputPartitionSize") int outPartitionSize);
+	@Produces(MediaType.APPLICATION_JSON)
+	void reducer(@QueryParam("inputPrefix")String inputPrefix,
+				 @QueryParam("jobClass") String jobClass,
+				 @QueryParam("outputPrefix") String outputPrefix,
+				 @QueryParam("outputPartitionSize") int outPartitionSize,
+				 @QueryParam("partitionCounter") int partitionCounter);
 }

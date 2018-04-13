@@ -46,8 +46,13 @@ public class Multicast {
                     DatagramPacket response = new DatagramPacket(data, data.length);
                     response.setAddress(request.getAddress());
                     response.setPort(request.getPort());
-                    socket.send(response);
-
+                    try {
+                        socket.send(response);
+                    }catch (java.io.IOException e){
+                        System.err.println("Failed to send message");
+                        System.err.println(request.getAddress());
+                        System.err.println(request.getPort());
+                    }
                     System.err.println("Multicast.receive");
                     System.err.println( "Address :" +request.getAddress());
                     System.err.println("Port : " + request.getPort());

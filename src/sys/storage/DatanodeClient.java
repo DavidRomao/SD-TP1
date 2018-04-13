@@ -4,12 +4,12 @@ import api.RestRequests;
 import api.storage.BlobStorage;
 import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
-
-import com.google.gson.Gson;
-
 import utils.JSON;
 
-import javax.ws.rs.client.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -88,11 +88,12 @@ public class DatanodeClient implements Datanode {
 	}
     
 	@Override
-	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix) {
+	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix,String worker) {
 		Response response = target.path("/mapper").
 				queryParam("jobClass",jobClass).
 				queryParam("blob",blob).
 				queryParam("outputPrefix", outputPrefix).
+				queryParam("worker",worker).
 				request().
 				post(Entity.entity(JSON.encode(blocks), MediaType.APPLICATION_JSON));
 		//Response path = makePost(target.path("/mapper").request()
@@ -101,12 +102,14 @@ public class DatanodeClient implements Datanode {
 	}
 
 	@Override
-	public void reducer(String jobClass, String outputPrefix, int outPartitionSize) {
+	public void reducer(String inputPrefix, String jobClass, String outputPrefix, int outPartitionSize,int partitionCounter) {
 		// TODO Auto-generated method stub
 		Response response = target.path("/reducer").
+				queryParam("inputPrefix",inputPrefix).
 				queryParam("jobClass", jobClass).
 				queryParam("outputPrefix",outputPrefix).
 				queryParam("outputPartitionSize", outPartitionSize).
+				queryParam("partitionCounter",partitionCounter).
 				request().
 				post(null);
 		System.out.println("Reducer Status: " + response.getStatus());

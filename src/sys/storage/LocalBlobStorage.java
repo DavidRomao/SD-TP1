@@ -4,6 +4,7 @@ import api.storage.BlobStorage;
 import api.storage.Datanode;
 import api.storage.Namenode;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class LocalBlobStorage implements BlobStorage {
@@ -15,6 +16,11 @@ public class LocalBlobStorage implements BlobStorage {
 	public LocalBlobStorage() {
 		this.namenode = new NamenodeClient();
 //		this.datanodes = new Datanode[] { new DatanodeClient() };
+	}
+
+	@Override
+	public Iterator<Datanode> getDatanodesIterator() {
+		return null;
 	}
 
 	@Override
