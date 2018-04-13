@@ -39,5 +39,5 @@ public interface Datanode {
 
     @POST
 	@Path("/reducer")
-	void reducer(@QueryParam("jobClass") String jobClass, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outPartitionSize") int outPartitionSize);
+	void reducer(@QueryParam("jobClass") String jobClass, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outputPartitionSize") int outPartitionSize);
 }

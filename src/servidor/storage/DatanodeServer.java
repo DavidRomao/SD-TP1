@@ -203,6 +203,7 @@ public class DatanodeServer implements Datanode {
 
     @Override
 	public void reducer(String jobClassBlob, String outputPrefix, int outPartitionSize) {
+    	System.out.println(outPartitionSize);
     	if(storage == null) {
     		storage = new BlobStorageClient();
     	}
