@@ -4,6 +4,9 @@ import api.RestRequests;
 import api.storage.BlobStorage;
 import api.storage.Datanode;
 import org.glassfish.jersey.client.ClientConfig;
+
+import com.google.gson.Gson;
+
 import utils.JSON;
 
 import javax.ws.rs.client.*;
@@ -83,7 +86,7 @@ public class DatanodeClient implements Datanode {
         Response response = RestRequests.makePost(target.path("/validate").request()
                             ,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
 	}
-
+    
 	@Override
 	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix) {
 		Response response = target.path("/mapper").
@@ -98,13 +101,14 @@ public class DatanodeClient implements Datanode {
 	}
 
 	@Override
-	public void reducer(String jobClass, String inputPrefix, String outputPrefix, int outPartitionSize) {
+	public void reducer(String jobClass, String outputPrefix, int outPartitionSize) {
 		// TODO Auto-generated method stub
 		Response response = target.path("/reducer").
-				queryParam("inputPrefix", inputPrefix).
+				queryParam("jobClass", jobClass).
 				queryParam("outputPrefix",outputPrefix).
 				queryParam("outputPartitionSize", outPartitionSize).
-				request().post(Entity.entity(jobClass, MediaType.APPLICATION_JSON));
+				request().
+				post(null);
 		System.out.println("Reducer Status: " + response.getStatus());
 	}
 	

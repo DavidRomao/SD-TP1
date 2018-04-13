@@ -1,11 +1,14 @@
 package servidor.storage;
 
 import api.storage.BlobStorage;
+import api.storage.BlobStorage.BlobWriter;
 import api.storage.Datanode;
 import api.storage.Namenode;
+import jersey.repackaged.com.google.common.collect.Lists;
 import sys.mapreduce.Jobs;
 import sys.mapreduce.JsonBlobWriter;
 import sys.mapreduce.MapReducer;
+import sys.mapreduce.ReducerTask;
 import sys.storage.BlobStorageClient;
 import utils.Base58;
 import utils.JSON;
@@ -19,6 +22,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author Cláudio Pereira 47942
@@ -151,13 +156,15 @@ public class DatanodeServer implements Datanode {
 	public void mapper(List<String>blocks, @QueryParam("test") String test){
 		System.out.println(test);
 	}
+	
     @SuppressWarnings("unchecked")
 	@Override
 	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix) {
         MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
         System.err.println("Map method invoked");
-        if (storage == null)
-			storage = new BlobStorageClient();
+        if(storage == null) {
+        	storage = new BlobStorageClient();
+        }
 		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
 
         job.setYielder( (key,val) -> jsonValueWriterFor( key ).write(val));
@@ -195,27 +202,28 @@ public class DatanodeServer implements Datanode {
 
 
     @Override
-	public void reducer(String job, String inputPrefix , String outputPrefix, int outPartitionSize) {
-		/*
+	public void reducer(String jobClassBlob, String outputPrefix, int outPartitionSize) {
+    	if(storage == null) {
+    		storage = new BlobStorageClient();
+    	}
+    	storage.listBlobs(outputPrefix + "-map-").stream().forEach( blob -> System.out.println(blob));
 		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
 				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
 				.collect( Collectors.toSet() );
-			
-			
-			AtomicInteger partitionCounter = new AtomicInteger(0);
-			Lists.partition( new ArrayList<>( reduceKeyPrefixes), outPartitionSize).forEach(partitionKeyList -> {
+				
+		AtomicInteger partitionCounter = new AtomicInteger(0);
+		Lists.partition( new ArrayList<>( reduceKeyPrefixes), outPartitionSize).forEach(partitionKeyList -> {
 					
 					String partitionOutputBlob = String.format("%s-part%04d", outputPrefix, partitionCounter.incrementAndGet());
 					
 					BlobWriter writer = storage.blobWriter(partitionOutputBlob);
-
+					
 					partitionKeyList.forEach( keyPrefix -> {
-						//new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
+						new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
 					});			
 					
 					writer.close();
 				});
-		*/
 	}
 }
 

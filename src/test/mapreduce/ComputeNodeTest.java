@@ -64,13 +64,12 @@ public class ComputeNodeTest {
         //   on the servidor
         computeNode.mapReduce("WordCount","doc-",outputBlob,MAX_PARTITION_SIZE);
 
-        /*
+        
         //8. Check the results. The results will be written in one of more partitions of the given maximum size.
         storage.listBlobs(outputBlob).stream().forEach( blob -> {
             //Print this partition blob name.
             System.out.println(blob);
             storage.readBlob(blob).forEach( System.out::println );
         });
-  */
     }
 }

@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ReducerTask extends MapReduceTask {
 
-	protected ReducerTask(String worker, BlobStorage storage, String jobClassBlob, String inputPrefix, String outputPrefix) {
+	public ReducerTask(String worker, BlobStorage storage, String jobClassBlob, String inputPrefix, String outputPrefix) {
 		super(worker, storage, jobClassBlob, inputPrefix, outputPrefix);
 
 	}
 	
-	void execute( BlobWriter writer ) {
+	public void execute( BlobWriter writer ) {
 		JobInstance job = Jobs.newJobInstance(storage, jobClassBlob);
 
 		String reduceKey = inputPrefix.substring( inputPrefix.lastIndexOf('-')+1);

@@ -37,15 +37,16 @@ public class ComputeNodeServer2 implements ComputeNode {
             String uri = blocks.get(0).split("datanode")[0];
 
             DatanodeClient datanodeClient = datanodeClientMap.get(uri);
-            if (datanodeClient != null)
+            if (datanodeClient != null) {
                 datanodeClient.mapper( blocks,jobClassBlob,s, outputPrefix );
-            else {
+            }else {
                 datanodeClient = new DatanodeClient(URI.create(uri+Datanode.PATH),storage);
                 System.out.println("Calling mapper on " + s);
                 datanodeClient.mapper( blocks , jobClassBlob,s, outputPrefix );
                 datanodeClientMap.put(uri,datanodeClient);
             }
         }
+        datanodeClientMap.values().iterator().next().reducer(jobClassBlob, outputPrefix, outPartSize);
         return true;
 //        MapReduceEngine engine = new MapReduceEngine("worker",storage);
 //        engine.executeJob( jobClassBlob,inputPrefix,outputPrefix,outPartSize);
