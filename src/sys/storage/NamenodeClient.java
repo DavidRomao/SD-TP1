@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /*
  *
@@ -30,13 +31,18 @@ public class NamenodeClient implements Namenode {
         Multicast multicast = new Multicast();
         gson = new Gson();
         try {
-            String namenodeURI = multicast.send(NAMENODE.getBytes(), 1000).iterator().next();
+            String namenodeURI = null;
+            while (namenodeURI == null) {
+                Set<String> send = multicast.send(NAMENODE.getBytes(), 1000);
+                if (send.size()> 0)
+                    namenodeURI = send.iterator().next();
+            }
             System.err.println("Namenode discovered at " + namenodeURI);
             Client client = ClientBuilder.newClient(new ClientConfig());
             target = client.target(UriBuilder.fromUri(namenodeURI + "namenode"));
         }catch (NoSuchElementException e){
             System.err.println("No namenodes available");
-            System.exit(0);
+//            System.exit(0);
         }
     }
 

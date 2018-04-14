@@ -50,7 +50,8 @@ public class DatanodeServer implements Datanode {
 		System.err.println("URI base" + base_uri);
 		// Garbage Collector
 		// Launch the thread
-		new Thread(new GarbageCollectorDatanode()).start();
+		// TODO: 14/04/18 fix and activate garbage collector
+//		new Thread(new GarbageCollectorDatanode()).start();
         this.uri = URI.create(base_uri);
     }
 
@@ -213,6 +214,8 @@ public class DatanodeServer implements Datanode {
     		storage = new BlobStorageClient();
     	}
 		String partitionOutputBlob = String.format("%s-part%04d", outputPrefix,partitionCounter);
+
+		String reduceKey = inputPrefix.substring( inputPrefix.lastIndexOf('-')+1);
 
 		BlobStorage.BlobWriter writer = storage.blobWriter(partitionOutputBlob);
 

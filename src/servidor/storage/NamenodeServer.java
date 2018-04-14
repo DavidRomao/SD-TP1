@@ -26,7 +26,8 @@ public class NamenodeServer implements Namenode {
         /*
         Send to the datanode the blocks recently deleted from the namenode table
          */
-        new Thread(new GargageCollector()).start();
+        /// TODO: 14/04/18 fix gargabe collector
+//        new Thread(new GargageCollector()).start();
     }
     public class GargageCollector implements Runnable{
 
@@ -37,9 +38,13 @@ public class NamenodeServer implements Namenode {
                     Thread.sleep(WAITING_TIME);
                     List<String> toRemove = new LinkedList<>();
                     suspects.forEach((name,blocks)-> {
-                        new DatanodeClient(
-                                URI.create(name.substring(0,name.lastIndexOf("/"))))
-                        .confirmDeletion(blocks,name);
+                        try {
+                            new DatanodeClient(
+                                    URI.create(name.substring(0,name.lastIndexOf("/"))))
+                                    .confirmDeletion(blocks,name);
+                        }catch (StringIndexOutOfBoundsException e){
+                            System.err.println("String with error " + name);
+                        }
                         toRemove.add(name);
                     });
                     // remove from the suspects the ones who were sent to the datanodes
@@ -86,6 +91,7 @@ public class NamenodeServer implements Namenode {
     @Override
     public void create(String name, List<String> blocks) {
         System.err.println("NamenodeServer.create");
+        System.err.println("Created " + name);
         if (blocks.size()==0)
             throw new WebApplicationException(Response.Status.NO_CONTENT);
         else if (nametable.containsKey(name))

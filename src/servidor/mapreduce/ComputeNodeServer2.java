@@ -73,12 +73,16 @@ public class ComputeNodeServer2 implements ComputeNode {
         for (List<String> partitionKeyList : Lists.partition(new ArrayList<>(reduceKeyPrefixes), outPartSize)) {
 
                 for (String keyPrefix : partitionKeyList) {
-
-                    if (iterator.hasNext())
-                        datanodeClientMap.get(iterator.next()).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
-                    else {
+                    String next;
+                    if (iterator.hasNext()) {
+                        next = iterator.next();
+                        System.err.println("Calling reducer on " + next);
+                        datanodeClientMap.get(next).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
+                    } else {
                         iterator = datanodes.iterator();
-                        datanodeClientMap.get(iterator.next()).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
+                        next = iterator.next();
+                        System.err.println("Calling reducer on " + next);
+                        datanodeClientMap.get(next).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
                     }
                     partitionCounter.getAndIncrement();
 //                new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);
