@@ -3,98 +3,118 @@ package servidor.mapreduce;
 import api.mapreduce.ComputeNode;
 import api.storage.BlobStorage;
 import api.storage.Namenode;
-import sys.mapreduce.Jobs;
-import sys.mapreduce.MapReduceEngine;
-import sys.mapreduce.MapReducer;
+import jersey.repackaged.com.google.common.collect.Lists;
 import sys.storage.BlobStorageClient;
 import sys.storage.DatanodeClient;
-import utils.Random;
+import utils.IP;
 
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
-
 import java.net.URI;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-/**
- * @author Cláudio Pereira 47942
- * @author David Romao 49309
- */
 @WebService(serviceName = ComputeNode.NAME,targetNamespace = ComputeNode.NAMESPACE,
         endpointInterface = ComputeNode.INTERFACE)
-public class ComputeNodeServer implements ComputeNode{
+public class ComputeNodeServer implements ComputeNode {
     private static String URI_BASE;
+    private final Map<String,DatanodeClient> datanodeClientMap = new ConcurrentHashMap<>();
+    private static BlobStorage storage;
+    private static Namenode namenode;
+    @Override
+    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException, InterruptedException {
+        System.out.println("ComputeNodeServer.mapReduce");
 
-    public static void main(String[] args) {
+        AtomicInteger workCount= new AtomicInteger();
 
-        if (args.length== 0)
-            URI_BASE = "http://0.0.0.0:3333" + ComputeNode.PATH;
-        else
-            URI_BASE = args[0]+ComputeNode.PATH;
-        //does nothing, just placeholder
-        System.err.println("ComputeNode Server ready at " + URI_BASE );
-        Endpoint.publish(URI_BASE,new ComputeNodeServer());
+        Map<String,List<String>> blocksByDatanode = new LinkedHashMap<>(100);
+
+        for (String s : namenode.list(inputPrefix)) {
+            List<String> blobBlocks = namenode.read(s);
+            // get uri for datanode
+            String uri = blobBlocks.get(0).substring(0, blobBlocks.get(0).lastIndexOf("/"));
+
+            List<String> datanodeBlocks = blocksByDatanode.get(uri);
+            if (datanodeBlocks == null) {
+                datanodeBlocks= new LinkedList<>();
+                datanodeBlocks.addAll(blobBlocks);
+                blocksByDatanode.put(uri,datanodeBlocks);
+            }else
+                datanodeBlocks.addAll(blobBlocks);
+        }
+        List<String> workers = new LinkedList<>();
+        blocksByDatanode.forEach((String uri,List<String> blocks) -> {
+
+            uri = blocks.get(0).substring(0,blocks.get(0).lastIndexOf("/"));
+            DatanodeClient datanodeClient = datanodeClientMap.get(uri);
+            System.out.println("Calling mapper on " + uri);
+            // add current datanode to the workers list
+            String worker = "worker" + workCount.get();
+            workers.add(worker);
+            if (datanodeClient != null) {
+                datanodeClient.asyncMapper( blocks,jobClassBlob, outputPrefix, worker,workers);
+            }else {
+                datanodeClient = new DatanodeClient(URI.create(uri),storage);
+                datanodeClient.asyncMapper( blocks , jobClassBlob, outputPrefix, worker,workers);
+                datanodeClientMap.put(uri,datanodeClient);
+            }
+            workCount.getAndIncrement();
+        });
+
+        // wait for the map tasks to complete
+        while (!workers.isEmpty())
+            Thread.sleep(250);
+
+//        datanodeClientMap.values().iterator().next().reducer(jobClassBlob, outputPrefix, outPartSize);
+
+        storage.listBlobs(outputPrefix + "-map-").stream().forEach( blob -> System.out.println(blob));
+        Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
+                .map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
+                .collect( Collectors.toSet() );
+
+        AtomicInteger partitionCounter = new AtomicInteger();
+        Set<String> datanodes = datanodeClientMap.keySet();
+        Iterator<String> iterator = datanodes.iterator();
+        List<String> keys = new LinkedList<>();
+        for (List<String> partitionKeyList : Lists.partition(new ArrayList<>(reduceKeyPrefixes), outPartSize)) {
+
+                for (String keyPrefix : partitionKeyList) {
+                    String next;
+                    keys.add(keyPrefix);
+                    if (iterator.hasNext()) {
+                        next = iterator.next();
+                        System.err.println("Calling reducer on " + next);
+                        datanodeClientMap.get(next).asyncReducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get(),keys);
+                    } else {
+                        iterator = datanodes.iterator();
+                        next = iterator.next();
+                        System.err.println("Calling reducer on " + next);
+                        datanodeClientMap.get(next).asyncReducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get(),keys);
+                    }
+                    partitionCounter.getAndIncrement();
+//                new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);
+                }
+            }
+        while (!keys.isEmpty())
+            Thread.sleep(250);
+        return true;
+//        MapReduceEngine engine = new MapReduceEngine("worker",storage);
+//        engine.executeJob( jobClassBlob,inputPrefix,outputPrefix,outPartSize);
+
     }
 
 
-    @Override
-    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
-        if (jobClassBlob == null || inputPrefix== null ||  outputPrefix == null || outPartSize < 0 ) {
-            throw new InvalidArgumentException();
-        }
-    	BlobStorage storage = new BlobStorageClient() ;
-        Namenode namenode = storage.getNamenode();
-		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
-        /*
-        storage.listBlobs(inputPrefix).forEach(blob -> {
-            namenode.read(blob).forEach(block ->{
+    public static void main(String[] args) {
+        if (args.length== 0)
+            URI_BASE = String.format("http://%s:%d%s",IP.hostAddress(),3333,ComputeNode.PATH);
+        else
+            URI_BASE = args[0]+ComputeNode.PATH;
+        storage = new BlobStorageClient();
+        namenode = storage.getNamenode();
 
-            });
-        });*/
-        String block = namenode.read(storage.listBlobs(inputPrefix).get(0)).get(0);
-    	String ip_path = block.split("//")[1];
-    	String ip = ip_path.split("/")[0];
-    	URI uri = URI.create("http://" + ip + "/datanode");
-    	DatanodeClient client = new DatanodeClient(uri);
-    	return true;
-//    	client.mapper(job, inputPrefix, outputPrefix);
-//    	client.reducer(job, inputPrefix, outputPrefix, outPartSize);
-
-
-    	/*Map<String,List<String>> blocksByDatanode = new HashMap<>();
-        Namenode namenode = storage.getNamenode();
-        storage.listBlobs(inputPrefix).forEach( blob -> {
-            namenode.read(blob).forEach( block -> {
-                String ip_path = block.split("//")[1];
-                String ip = ip_path.substring(0,ip_path.indexOf("/"));
-                List<String> strings = blocksByDatanode.get( ip );
-                if (strings != null)
-                    strings.add( block.substring( block.lastIndexOf("/")+1) );
-                else {
-                    LinkedList<String> list = new LinkedList<>();
-                    //Split example to get block
-                    //e.g. localhost:9999/datanode/gupf3494lo
-                    //0- localhost:9999
-                    //1- datanode
-                    //2- gupf3494lo
-                    
-                    list.add(ip_path.split("/")[2]);
-                    blocksByDatanode.put(ip,list);
-                }
-
-            });
-        });
-        // print the blocks by datanode
-        blocksByDatanode.keySet().forEach( datanode-> {
-            System.out.println("datanode ip : " + datanode);
-            blocksByDatanode.get(datanode).forEach(System.out::println);
-            System.out.printf("\n");
-        });*/
-    	
-		//MapReduceEngine engine = new MapReduceEngine( "local", storage);
-        //engine.executeJob(jobClassBlob,inputPrefix,outputPrefix,outPartSize);
+        Endpoint.publish(URI_BASE,new ComputeNodeServer());
+        System.err.println("ComputeNode Server ready at " + URI_BASE );
     }
 }
