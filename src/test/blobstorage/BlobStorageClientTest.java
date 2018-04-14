@@ -2,10 +2,11 @@ package test.blobstorage;
 
 import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
-import org.glassfish.hk2.api.messaging.SubscribeTo;
 import org.junit.jupiter.api.Test;
 import sys.storage.BlobStorageClient;
+import sys.storage.DatanodeClient;
 
+import java.net.URI;
 import java.util.List;
 
 import static api.storage.BlobStorage.BlobReader;
@@ -20,7 +21,15 @@ public class BlobStorageClientTest {
 
     public static void main(String[] args) {
         storage = new BlobStorageClient();
-        testWrite(100);
+        BlobWriter doc = storage.blobWriter("doc");
+        doc.writeLine("line");
+        doc.close();
+        String doc1 = storage.getNamenode().read("doc").get(0);
+        new DatanodeClient(URI.create("http://192.168.1.15:9999/datanode")).deleteBlock(doc1.substring(doc1.lastIndexOf("/")));
+        BlobReader strings = storage.readBlob("doc");
+        String s = strings.readLine();
+        System.out.println(s);
+//        testWrite(100);
 //        testRead(100);
 
 //        test1();

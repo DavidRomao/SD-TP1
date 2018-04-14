@@ -8,6 +8,7 @@ import sys.mapreduce.JsonBlobWriter;
 import sys.mapreduce.MapReducer;
 import sys.mapreduce.ReducerTask;
 import sys.storage.BlobStorageClient;
+import sys.storage.NamenodeClient;
 import utils.Base58;
 import utils.JSON;
 import utils.Random;
@@ -30,44 +31,46 @@ public class DatanodeServer implements Datanode {
 	public static final int WaitingTime = 20 * 1000;
     private final URI uri;
     private String base_uri;
-	private ConcurrentMap<String,Long> unverifiedBlocksTime = new ConcurrentHashMap<>();
-	private ConcurrentMap<String,String> unverifiedBlocksBlobname = new ConcurrentHashMap<>();
+	private ConcurrentMap<String,DataSet> unverifiedBlocks = new ConcurrentHashMap<>();
 	private BlobStorage storage;
-
     private String MapOutputBlobNameFormat;
 
+	class DataSet{
+		long time;
+		String name;
 
+		public DataSet(long time, String name) {
+			this.time = time;
+			this.name = name;
+		}
+	}
     @SuppressWarnings("InfiniteLoopStatement")
 	public DatanodeServer(String base_uri) {
 		this.base_uri = base_uri;
 		System.err.println("URI base" + base_uri);
 		// Garbage Collector
 		// Launch the thread
-//		garbageCollectorLauncher();
+		new Thread(new GarbageCollectorDatanode()).start();
         this.uri = URI.create(base_uri);
-
-
-
     }
 
 	@SuppressWarnings("InfiniteLoopStatement")
-	private void garbageCollectorLauncher(){
-		new Thread( () -> {
-			storage = new BlobStorageClient();
-			Namenode namenodeClient = storage.getNamenode();
+	private class GarbageCollectorDatanode implements Runnable {
+		@Override
+		public void run() {
+			Namenode namenodeClient = new NamenodeClient();
 			while (true) {
 				try {
-                    Thread.sleep(WaitingTime);
-                    unverifiedBlocksTime.forEach((key, time) -> {
+					Thread.sleep(WaitingTime);
+					unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
-						if (System.currentTimeMillis() - time > WaitingTime) {
-							String name = unverifiedBlocksBlobname.get(key);
+						if (System.currentTimeMillis() - data.time > WaitingTime) {
+							String name = data.name;
 							// if when the block was created a blob name was sent too
 							if (name != null) {
 								// if it's a lost block
 								if (!namenodeClient.exists(name, key)) {
-									unverifiedBlocksBlobname.remove(key);
-									unverifiedBlocksTime.remove(key);
+									unverifiedBlocks.remove(key);
 									new File(key).delete();
 								}
 							} else // delete the block
@@ -78,14 +81,18 @@ public class DatanodeServer implements Datanode {
 									new File(key).delete();
 							}
 						}
-
 					});
 				} catch (InterruptedException e) {
 					System.out.println("Thread Sleep interrupted");
 				}
 			}
-		}).start();
+		}
 	}
+
+	private  void put(ConcurrentMap<String, DataSet> unverifiedBlocks, String id, long l,String name){
+		unverifiedBlocks.put(id, new DataSet(l,name));
+	}
+
 	@Override
 	public String createBlock(byte[] data, String blobName){
 
@@ -96,11 +103,13 @@ public class DatanodeServer implements Datanode {
 			out.write(data);
 			out.close();
 			System.out.printf("block created : %s/%s\n", base_uri, id);
-			unverifiedBlocksTime.put(id,System.currentTimeMillis());
 			if (blobName != null) {
-				unverifiedBlocksBlobname.put(id,blobName);
+				put(unverifiedBlocks,id,System.currentTimeMillis(),blobName );
+			}else
+				put(unverifiedBlocks,id,System.currentTimeMillis(),null);
+			{
+				return base_uri + "/" + id;
 			}
-			return base_uri + "/" + id;
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");
@@ -136,14 +145,23 @@ public class DatanodeServer implements Datanode {
 			in.close();
 			return blob;
 		}catch(IOException e) {
-            System.out.println(e.getCause());
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
 	@Override
 	public void confirmBlocks(List<String> blocks) {
+		System.out.println("Received Confirmations");
 		// remove blocks from the unverified blocks list
-		blocks.forEach( block -> unverifiedBlocksTime.remove(block) );
+		blocks.forEach( block -> unverifiedBlocks.remove(block) );
+	}
+
+	@Override
+	public void confirmDeletion(List<String> blocks, String name) {
+		for (String block : blocks) {
+			File file = new File(block);
+			if (file.exists())
+				file.delete();
+		}
 	}
 
     @SuppressWarnings("unchecked")
@@ -174,7 +192,6 @@ public class DatanodeServer implements Datanode {
 
 
 	}
-
 
     private Map<Object, JsonBlobWriter> writers = new ConcurrentHashMap<>();
 

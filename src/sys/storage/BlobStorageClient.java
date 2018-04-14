@@ -71,7 +71,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     }
 
     @Override
-    public BlobReader readBlob(String name) {
+    public BlobReader readBlob(String name) throws javax.ws.rs.NotFoundException{
 //        System.err.println("BlobStorageClient.readBlob");
         return new BufferedBlobReader(name,namenode,datanodes);
     }

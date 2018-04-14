@@ -86,7 +86,15 @@ public class DatanodeClient implements Datanode {
         Response response = RestRequests.makePost(target.path("/validate").request()
                             ,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
 	}
-    
+
+	@Override
+	public void confirmDeletion(List<String> blocks, String name) {
+		RestRequests.makePost(target.path("/validate/delete")
+								.queryParam("name",name).request()
+				,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
+
+	}
+
 	@Override
 	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix,String worker) {
 		Response response = target.path("/mapper").

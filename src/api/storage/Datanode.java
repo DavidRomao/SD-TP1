@@ -30,8 +30,13 @@ public interface Datanode {
 	@Path("/validate")
 	@Consumes(MediaType.APPLICATION_JSON)
 	void confirmBlocks(List<String> blocks);
-	
+
 	@POST
+	@Path("/validate/delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+    void confirmDeletion(List<String> blocks,@QueryParam("name") String name);
+
+    @POST
 	@Path("/mapper")
 	@Consumes(MediaType.APPLICATION_JSON)
 	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob,
