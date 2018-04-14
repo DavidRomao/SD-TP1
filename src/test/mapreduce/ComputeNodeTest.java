@@ -34,7 +34,7 @@ public class ComputeNodeTest {
                 .stream().forEach( src::writeLine );
         src.close();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             BlobStorage.BlobWriter out= storage.blobWriter("doc-"+i);
             out.writeLine("uma batata ja nao e viva");
             out.writeLine("outra puta maluca");

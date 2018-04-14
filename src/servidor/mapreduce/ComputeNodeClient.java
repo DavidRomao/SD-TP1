@@ -26,7 +26,7 @@ public class ComputeNodeClient {
 
 	}
 
-	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) {
+	public void mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InterruptedException {
 		try{
 			computeNode.mapReduce(jobClassBlob, inputPrefix, outputPrefix, outPartSize);
 		}catch(InvalidArgumentException e){

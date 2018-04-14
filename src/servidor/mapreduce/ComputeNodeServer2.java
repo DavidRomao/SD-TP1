@@ -24,7 +24,7 @@ public class ComputeNodeServer2 implements ComputeNode {
     private static BlobStorage storage;
     private static Namenode namenode;
     @Override
-    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
+    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException, InterruptedException {
         System.out.println("ComputeNodeServer2.mapReduce");
 
         AtomicInteger workCount= new AtomicInteger();
@@ -44,21 +44,28 @@ public class ComputeNodeServer2 implements ComputeNode {
             }else
                 datanodeBlocks.addAll(blobBlocks);
         }
+        List<String> workers = new LinkedList<>();
         blocksByDatanode.forEach((String uri,List<String> blocks) -> {
 
             uri = blocks.get(0).substring(0,blocks.get(0).lastIndexOf("/"));
-
             DatanodeClient datanodeClient = datanodeClientMap.get(uri);
             System.out.println("Calling mapper on " + uri);
+            // add current datanode to the workers list
+            String worker = "worker" + workCount.get();
+            workers.add(worker);
             if (datanodeClient != null) {
-                datanodeClient.mapper( blocks,jobClassBlob, outputPrefix,"worker"+workCount.get());
+                datanodeClient.asyncMapper( blocks,jobClassBlob, outputPrefix, worker,workers);
             }else {
                 datanodeClient = new DatanodeClient(URI.create(uri),storage);
-                datanodeClient.mapper( blocks , jobClassBlob, outputPrefix,"worker"+workCount.get());
+                datanodeClient.asyncMapper( blocks , jobClassBlob, outputPrefix, worker,workers);
                 datanodeClientMap.put(uri,datanodeClient);
             }
             workCount.getAndIncrement();
         });
+
+        // wait for the map tasks to complete
+        while (!workers.isEmpty())
+            Thread.sleep(250);
 
 //        datanodeClientMap.values().iterator().next().reducer(jobClassBlob, outputPrefix, outPartSize);
 
@@ -70,25 +77,28 @@ public class ComputeNodeServer2 implements ComputeNode {
         AtomicInteger partitionCounter = new AtomicInteger();
         Set<String> datanodes = datanodeClientMap.keySet();
         Iterator<String> iterator = datanodes.iterator();
+        List<String> keys = new LinkedList<>();
         for (List<String> partitionKeyList : Lists.partition(new ArrayList<>(reduceKeyPrefixes), outPartSize)) {
 
                 for (String keyPrefix : partitionKeyList) {
                     String next;
+                    keys.add(keyPrefix);
                     if (iterator.hasNext()) {
                         next = iterator.next();
                         System.err.println("Calling reducer on " + next);
-                        datanodeClientMap.get(next).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
+                        datanodeClientMap.get(next).asyncReducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get(),keys);
                     } else {
                         iterator = datanodes.iterator();
                         next = iterator.next();
                         System.err.println("Calling reducer on " + next);
-                        datanodeClientMap.get(next).reducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get());
+                        datanodeClientMap.get(next).asyncReducer(keyPrefix, jobClassBlob, outputPrefix, outPartSize, partitionCounter.get(),keys);
                     }
                     partitionCounter.getAndIncrement();
 //                new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);
                 }
             }
-
+        while (!keys.isEmpty())
+            Thread.sleep(250);
         return true;
 //        MapReduceEngine engine = new MapReduceEngine("worker",storage);
 //        engine.executeJob( jobClassBlob,inputPrefix,outputPrefix,outPartSize);
