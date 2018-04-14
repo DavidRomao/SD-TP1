@@ -27,7 +27,7 @@ public class ComputeNodeTest {
         //1. Get the storage implementation. Replace with your own implementation...
         BlobStorage storage = new BlobStorageClient();
 
-
+        storage.deleteBlobs("");
         //2. Copy all lines of WordCount.java to a blob named WordCount.
         BlobStorage.BlobWriter src = storage.blobWriter("WordCount");
         Files.readAllLines(new File("WordCount.java").toPath())
