@@ -96,10 +96,9 @@ public class DatanodeClient implements Datanode {
 	}
 
 	@Override
-	public void mapper( List<String> blocks, String jobClass, String blob, String outputPrefix,String worker) {
+	public void mapper( List<String> blocks, String jobClass, String outputPrefix,String worker) {
 		Response response = target.path("/mapper").
 				queryParam("jobClass",jobClass).
-				queryParam("blob",blob).
 				queryParam("outputPrefix", outputPrefix).
 				queryParam("worker",worker).
 				request().

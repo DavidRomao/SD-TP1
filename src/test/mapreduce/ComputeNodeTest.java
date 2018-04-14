@@ -34,16 +34,20 @@ public class ComputeNodeTest {
                 .stream().forEach( src::writeLine );
         src.close();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             BlobStorage.BlobWriter out= storage.blobWriter("doc-"+i);
             out.writeLine("uma batata ja nao e viva");
             out.close();
         }
-        for (int i = 0; i < 10; i++) {
-            BlobStorage.BlobWriter out= storage.blobWriter("doc-1"+i);
-            out.writeLine("outra puta maluca");
-            out.close();
-        }
+//        for (int i = 0; i < 21; i++) {
+//            BlobStorage.BlobWriter out= storage.blobWriter("doc-1"+i);
+//            out.writeLine("outra puta maluca");
+//            out.writeLine("uma vaca parva");
+//            out.close();
+//        }
+        //printing blobs location
+        System.err.println("printing blobs location");
+        storage.listBlobs("doc").forEach((blob) -> storage.getNamenode().read(blob).forEach( System.out::println));
         // uma batata ja nao e viva
         // outra maluca esta no ceu
 

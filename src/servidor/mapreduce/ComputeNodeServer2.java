@@ -2,7 +2,6 @@ package servidor.mapreduce;
 
 import api.mapreduce.ComputeNode;
 import api.storage.BlobStorage;
-import api.storage.Datanode;
 import api.storage.Namenode;
 import jersey.repackaged.com.google.common.collect.Lists;
 import sys.storage.BlobStorageClient;
@@ -27,22 +26,40 @@ public class ComputeNodeServer2 implements ComputeNode {
     @Override
     public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException {
         System.out.println("ComputeNodeServer2.mapReduce");
-        int workCount=0;
+
+        AtomicInteger workCount= new AtomicInteger();
+
+        Map<String,List<String>> blocksByDatanode = new LinkedHashMap<>(100);
+
         for (String s : namenode.list(inputPrefix)) {
-            List<String> blocks = namenode.read(s);
-            String uri = blocks.get(0).split("datanode")[0];
+            List<String> blobBlocks = namenode.read(s);
+            // get uri for datanode
+            String uri = blobBlocks.get(0).substring(0, blobBlocks.get(0).lastIndexOf("/"));
+
+            List<String> datanodeBlocks = blocksByDatanode.get(uri);
+            if (datanodeBlocks == null) {
+                datanodeBlocks= new LinkedList<>();
+                datanodeBlocks.addAll(blobBlocks);
+                blocksByDatanode.put(uri,datanodeBlocks);
+            }else
+                datanodeBlocks.addAll(blobBlocks);
+        }
+        blocksByDatanode.forEach((String uri,List<String> blocks) -> {
+
+            uri = blocks.get(0).substring(0,blocks.get(0).lastIndexOf("/"));
 
             DatanodeClient datanodeClient = datanodeClientMap.get(uri);
+            System.out.println("Calling mapper on " + uri);
             if (datanodeClient != null) {
-                datanodeClient.mapper( blocks,jobClassBlob,s, outputPrefix,"worker"+workCount);
+                datanodeClient.mapper( blocks,jobClassBlob, outputPrefix,"worker"+workCount.get());
             }else {
-                datanodeClient = new DatanodeClient(URI.create(uri+Datanode.PATH),storage);
-                System.out.println("Calling mapper on " + s);
-                datanodeClient.mapper( blocks , jobClassBlob,s, outputPrefix,"worker"+workCount);
+                datanodeClient = new DatanodeClient(URI.create(uri),storage);
+                datanodeClient.mapper( blocks , jobClassBlob, outputPrefix,"worker"+workCount.get());
                 datanodeClientMap.put(uri,datanodeClient);
             }
-            workCount++;
-        }
+            workCount.getAndIncrement();
+        });
+
 //        datanodeClientMap.values().iterator().next().reducer(jobClassBlob, outputPrefix, outPartSize);
 
         storage.listBlobs(outputPrefix + "-map-").stream().forEach( blob -> System.out.println(blob));

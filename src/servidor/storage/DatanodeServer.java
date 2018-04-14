@@ -166,7 +166,7 @@ public class DatanodeServer implements Datanode {
 
     @SuppressWarnings("unchecked")
 	@Override
-	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix,String worker) {
+	public void mapper(List<String> blocks,String jobClassBlob,  String outputPrefix,String worker) {
         MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + worker;
         System.err.println("Map method invoked");
         if(storage == null) {
@@ -181,7 +181,7 @@ public class DatanodeServer implements Datanode {
         for (String block : blocks) {
         	block = block.split("datanode/")[1];
             for (String line : new String(readBlock(block)).split("\\n")  ) {
-                job.map(blob, line);
+                job.map(block, line);
             }
         }
 
