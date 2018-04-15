@@ -23,4 +23,4 @@ public class PingReceiver implements Runnable{
 					System.err.println("Multicast ip not found.");
 				}
 			}
-}
+	}

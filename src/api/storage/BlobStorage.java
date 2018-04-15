@@ -1,10 +1,13 @@
 package api.storage;
 
+import java.util.Iterator;
 import java.util.List;
 
 public interface BlobStorage {
 
-	List<String> listBlobs( String prefix );
+    Iterator<Datanode> getDatanodesIterator();
+
+    List<String> listBlobs(String prefix );
 	
 	void deleteBlobs( String prefix );
 	

@@ -51,6 +51,8 @@ public class LocalMapReduceTest {
 			//7. Perform the WordCount computation, over the two blobs named "doc-*"
 			MapReduceEngine engine = new MapReduceEngine( "local", storage);
 			engine.executeJob("WordCount", "doc-", outputBlob, MAX_PARTITION_SIZE);
+//			ComputeNodeClient client=  new ComputeNodeClient();
+//			client.mapReduce("WordCount", "doc-", outputBlob, MAX_PARTITION_SIZE);
 
 			//8. Check the results. The results will be written in one of more partitions of the given maximum size.
 			storage.listBlobs(outputBlob).stream().forEach( blob -> {

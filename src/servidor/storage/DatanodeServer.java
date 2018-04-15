@@ -6,13 +6,14 @@ import api.storage.Namenode;
 import sys.mapreduce.Jobs;
 import sys.mapreduce.JsonBlobWriter;
 import sys.mapreduce.MapReducer;
+import sys.mapreduce.ReducerTask;
 import sys.storage.BlobStorageClient;
+import sys.storage.NamenodeClient;
 import utils.Base58;
 import utils.JSON;
 import utils.Random;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 import java.io.*;
 import java.net.URI;
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DatanodeServer implements Datanode {
 
-	private static final int WaitingTime = 10 * 1000;
+	public static final int WaitingTime = 20 * 1000;
     private final URI uri;
     private String base_uri;
 	private ConcurrentMap<String,DataSet> unverifiedBlocks = new ConcurrentHashMap<>();
@@ -49,21 +50,22 @@ public class DatanodeServer implements Datanode {
 		System.err.println("URI base" + base_uri);
 		// Garbage Collector
 		// Launch the thread
-		garbageCollectorLauncher();
+		// TODO: 14/04/18 fix and activate garbage collector
+//		new Thread(new GarbageCollectorDatanode()).start();
         this.uri = URI.create(base_uri);
     }
 
 	@SuppressWarnings("InfiniteLoopStatement")
-	private void garbageCollectorLauncher(){
-		new Thread( () -> {
-			storage = new BlobStorageClient();
-			Namenode namenodeClient = storage.getNamenode();
+	private class GarbageCollectorDatanode implements Runnable {
+		@Override
+		public void run() {
+			Namenode namenodeClient = new NamenodeClient();
 			while (true) {
 				try {
-                    Thread.sleep(WaitingTime);
-                    unverifiedBlocks.forEach((key, data) -> {
+					Thread.sleep(WaitingTime);
+					unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
-						if ( System.currentTimeMillis() - data.time > WaitingTime) {
+						if (System.currentTimeMillis() - data.time > WaitingTime) {
 							String name = data.name;
 							// if when the block was created a blob name was sent too
 							if (name != null) {
@@ -72,7 +74,7 @@ public class DatanodeServer implements Datanode {
 									unverifiedBlocks.remove(key);
 									new File(key).delete();
 								}
-							} else
+							} else // delete the block
 							{
 								// if a blob name was not provided when the block was created ,
 								// perform a deep search on the namenode to try and find the block
@@ -80,18 +82,18 @@ public class DatanodeServer implements Datanode {
 									new File(key).delete();
 							}
 						}
-
 					});
 				} catch (InterruptedException e) {
 					System.out.println("Thread Sleep interrupted");
 				}
 			}
-		}).start();
+		}
 	}
 
 	private  void put(ConcurrentMap<String, DataSet> unverifiedBlocks, String id, long l,String name){
 		unverifiedBlocks.put(id, new DataSet(l,name));
 	}
+
 	@Override
 	public String createBlock(byte[] data, String blobName){
 
@@ -155,23 +157,22 @@ public class DatanodeServer implements Datanode {
 	}
 
 	@Override
-	public void confirmDeletion(List<String> blocks) {
-		//todo
+	public void confirmDeletion(List<String> blocks, String name) {
+		for (String block : blocks) {
+			File file = new File(block);
+			if (file.exists())
+				file.delete();
+		}
 	}
 
-	@Path("/map")
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void mapper(List<String>blocks, @QueryParam("test") String test){
-		System.out.println(test);
-	}
     @SuppressWarnings("unchecked")
 	@Override
-	public void mapper(List<String> blocks,String jobClassBlob, String blob,  String outputPrefix) {
-        MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + uri.getHost()+":"+ uri.getPort();
+	public void mapper(List<String> blocks,String jobClassBlob,  String outputPrefix,String worker) {
+        MapOutputBlobNameFormat = outputPrefix + "-map-%s-" + worker;
         System.err.println("Map method invoked");
-        if (storage == null)
-			storage = new BlobStorageClient();
+        if(storage == null) {
+        	storage = new BlobStorageClient();
+        }
 		MapReducer job = Jobs.newJobInstance(storage, jobClassBlob).instance;
 
         job.setYielder( (key,val) -> jsonValueWriterFor( key ).write(val));
@@ -181,9 +182,8 @@ public class DatanodeServer implements Datanode {
         for (String block : blocks) {
         	block = block.split("datanode/")[1];
             for (String line : new String(readBlock(block)).split("\\n")  ) {
-                job.map(blob, line);
+                job.map(block, line);
             }
-
         }
 
         job.map_end();
@@ -193,7 +193,6 @@ public class DatanodeServer implements Datanode {
 
 
 	}
-
 
     private Map<Object, JsonBlobWriter> writers = new ConcurrentHashMap<>();
 
@@ -209,27 +208,20 @@ public class DatanodeServer implements Datanode {
 
 
     @Override
-	public void reducer(String job, String inputPrefix , String outputPrefix, int outPartitionSize) {
-		/*
-		Set<String> reduceKeyPrefixes = storage.listBlobs(outputPrefix + "-map-").stream()
-				.map( blob -> blob.substring( 0, blob.lastIndexOf('-')))
-				.collect( Collectors.toSet() );
-			
-			
-			AtomicInteger partitionCounter = new AtomicInteger(0);
-			Lists.partition( new ArrayList<>( reduceKeyPrefixes), outPartitionSize).forEach(partitionKeyList -> {
-					
-					String partitionOutputBlob = String.format("%s-part%04d", outputPrefix, partitionCounter.incrementAndGet());
-					
-					BlobWriter writer = storage.blobWriter(partitionOutputBlob);
+	public void reducer(String inputPrefix,String jobClassBlob, String outputPrefix, int outPartitionSize,int partitionCounter) {
+    	System.out.println(outPartitionSize);
+    	if(storage == null) {
+    		storage = new BlobStorageClient();
+    	}
+		String partitionOutputBlob = String.format("%s-part%04d", outputPrefix,partitionCounter);
 
-					partitionKeyList.forEach( keyPrefix -> {
-						//new ReducerTask("client", storage, jobClassBlob, keyPrefix, outputPrefix).execute(writer);			
-					});			
-					
-					writer.close();
-				});
-		*/
+		String reduceKey = inputPrefix.substring( inputPrefix.lastIndexOf('-')+1);
+
+		BlobStorage.BlobWriter writer = storage.blobWriter(partitionOutputBlob);
+
+    	new ReducerTask("reducer",storage,jobClassBlob,inputPrefix,outputPrefix)
+				.execute(writer);
+
 	}
 }
 

@@ -32,17 +32,23 @@ public interface Datanode {
 	void confirmBlocks(List<String> blocks);
 
 	@POST
-	@Consumes
-	void confirmDeletion(List<String> blocks);
+	@Path("/validate/delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+    void confirmDeletion(List<String> blocks,@QueryParam("name") String name);
 
-	@POST
+    @POST
 	@Path("/mapper")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass, @QueryParam("blob") String blob, @QueryParam("outputPrefix") String outputPrefix);
+	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass,
+				 					  @QueryParam("outputPrefix") String outputPrefix,@QueryParam("worker") String worker);
 
 
     @POST
 	@Path("/reducer")
-	@Consumes(MediaType.APPLICATION_JSON)
-	void reducer(@QueryParam("jobClass") String jobClass, @QueryParam("inputPrefix") String inputPrefix, @QueryParam("outputPrefix") String outputPrefix, @QueryParam("outPartitionSize") int outPartitionSize);
+	@Produces(MediaType.APPLICATION_JSON)
+	void reducer(@QueryParam("inputPrefix")String inputPrefix,
+				 @QueryParam("jobClass") String jobClass,
+				 @QueryParam("outputPrefix") String outputPrefix,
+				 @QueryParam("outputPartitionSize") int outPartitionSize,
+				 @QueryParam("partitionCounter") int partitionCounter);
 }
