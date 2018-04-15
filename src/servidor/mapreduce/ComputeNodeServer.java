@@ -28,9 +28,12 @@ public class ComputeNodeServer implements ComputeNode {
     private static BlobStorage storage;
     private static Namenode namenode;
     @Override
-    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InvalidArgumentException, InterruptedException {
+    public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InterruptedException, InvalidArgumentException {
         System.out.println("ComputeNodeServer.mapReduce");
 
+        if (jobClassBlob == null || inputPrefix == null || outputPrefix == null || outPartSize <=0) {
+            throw new InvalidArgumentException();
+        }
         AtomicInteger workCount= new AtomicInteger();
 
         Map<String,List<String>> blocksByDatanode = new LinkedHashMap<>(100);
