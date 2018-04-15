@@ -39,10 +39,9 @@ public class ComputeNodeServer implements ComputeNode {
             List<String> datanodeBlocks = blocksByDatanode.get(uri);
             if (datanodeBlocks == null) {
                 datanodeBlocks= new LinkedList<>();
-                datanodeBlocks.addAll(blobBlocks);
-                blocksByDatanode.put(uri,datanodeBlocks);
-            }else
-                datanodeBlocks.addAll(blobBlocks);
+            }
+            datanodeBlocks.addAll(blobBlocks);
+            blocksByDatanode.put(uri, datanodeBlocks);
         }
         List<String> workers = new LinkedList<>();
         blocksByDatanode.forEach((String uri,List<String> blocks) -> {
