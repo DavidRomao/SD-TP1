@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Cláudio Pereira 47942
@@ -51,6 +54,9 @@ public class DatanodeServer implements Datanode {
 		// Garbage Collector
 		// Launch the thread
 		// TODO: 14/04/18 fix and activate garbage collector
+		GarbageCollectorDatanode garbageCollector = new GarbageCollectorDatanode();
+		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(garbageCollector, 20, 20, TimeUnit.SECONDS);
 //		new Thread(new GarbageCollectorDatanode()).start();
         this.uri = URI.create(base_uri);
     }
@@ -61,8 +67,6 @@ public class DatanodeServer implements Datanode {
 		public void run() {
 			Namenode namenodeClient = new NamenodeClient();
 			while (true) {
-				try {
-					Thread.sleep(WaitingTime);
 					unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
 						if (System.currentTimeMillis() - data.time > WaitingTime) {
@@ -83,9 +87,6 @@ public class DatanodeServer implements Datanode {
 							}
 						}
 					});
-				} catch (InterruptedException e) {
-					System.out.println("Thread Sleep interrupted");
-				}
 			}
 		}
 	}
@@ -108,9 +109,8 @@ public class DatanodeServer implements Datanode {
 				put(unverifiedBlocks,id,System.currentTimeMillis(),blobName );
 			}else
 				put(unverifiedBlocks,id,System.currentTimeMillis(),null);
-			{
-				return base_uri + "/" + id;
-			}
+			
+			return base_uri + "/" + id;
 		}catch(IOException e) {
 			// never happens, the block is always created
 			System.err.println("Internal Error!");

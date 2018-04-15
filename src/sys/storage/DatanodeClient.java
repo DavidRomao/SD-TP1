@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /*
@@ -110,30 +111,43 @@ public class DatanodeClient implements Datanode {
 	}
 
 	public void asyncMapper(List<String> blocks, String jobClass, String outputPrefix, String worker, List<String> workers){
+		
+        int tries = 0;
+        Future<Response> response = null;
+        while (response == null && tries < 5) {
+            try {
+        				response = target.path("/mapper").
+        				queryParam("jobClass",jobClass).
+        				queryParam("outputPrefix", outputPrefix).
+        				queryParam("worker",worker).
+        				request().
+        				async().
+        				post(Entity.entity(JSON.encode(blocks), MediaType.APPLICATION_JSON),
+        						new InvocationCallback<Response>() {
+        							@Override
+        							public void completed(Response response) {
+        								System.out.println("Map task completed by " + worker);
+        								workers.remove(worker);
+        								System.out.println("Mapper Status: " + response.getStatus() );
+        							}
 
-		Future<Response> response = target.path("/mapper").
-				queryParam("jobClass",jobClass).
-				queryParam("outputPrefix", outputPrefix).
-				queryParam("worker",worker).
-				request().
-				async().
-				post(Entity.entity(JSON.encode(blocks), MediaType.APPLICATION_JSON),
-						new InvocationCallback<Response>() {
-							@Override
-							public void completed(Response response) {
-								System.out.println("Map task completed by " + worker);
-								workers.remove(worker);
-								System.out.println("Mapper Status: " + response.getStatus() );
-							}
-
-							@Override
-							public void failed(Throwable throwable) {
-								System.out.println("Map task failed by " + worker + " at " + datanodeURI);
-							}
-						});
-		//Response path = makePost(target.path("/mapper").request()
-		//				 	,Entity.entity(entity, mediaType));
-		System.out.println("Mapper Status: " + response.isDone());
+        							@Override
+        							public void failed(Throwable throwable) {
+        								System.out.println("Map task failed by " + worker + " at " + datanodeURI);
+        							}
+        						});
+        		//Response path = makePost(target.path("/mapper").request()
+        		//				 	,Entity.entity(entity, mediaType));
+        		System.out.println("Mapper Status: " + response.isDone());
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
 	}
 
 	@Override
@@ -153,26 +167,41 @@ public class DatanodeClient implements Datanode {
 
 	public void asyncReducer(String inputPrefix, String jobClass, String outputPrefix, int outPartitionSize, int partitionCounter, List<String> keys) {
 		// TODO Auto-generated method stub
-		Future<Object> response = target.path("/reducer").
-				queryParam("inputPrefix",inputPrefix).
-				queryParam("jobClass", jobClass).
-				queryParam("outputPrefix",outputPrefix).
-				queryParam("outputPartitionSize", outPartitionSize).
-				queryParam("partitionCounter",partitionCounter).
-				request().
-				async().
-				post(Entity.json(""), new InvocationCallback<Object>() {
-					@Override
-					public void completed(Object o) {
-						keys.remove(inputPrefix);
-					}
+		
+        int tries = 0;
+        Future<Object> response = null;
+        while (response == null && tries < 5) {
+            try {
+        				response = target.path("/reducer").
+        				queryParam("inputPrefix",inputPrefix).
+        				queryParam("jobClass", jobClass).
+        				queryParam("outputPrefix",outputPrefix).
+        				queryParam("outputPartitionSize", outPartitionSize).
+        				queryParam("partitionCounter",partitionCounter).
+        				request().
+        				async().
+        				post(Entity.json(""), new InvocationCallback<Object>() {
+        					@Override
+        					public void completed(Object o) {
+        						keys.remove(inputPrefix);
+        					}
 
-					@Override
-					public void failed(Throwable throwable) {
-						System.err.println("Reduce task " + inputPrefix + " failed at " + datanodeURI);
-					}
-				});
-		System.out.println("Reducer Status: " + response.isDone());
+        					@Override
+        					public void failed(Throwable throwable) {
+        						System.err.println("Reduce task " + inputPrefix + " failed at " + datanodeURI);
+        					}
+        				});
+        		System.out.println("Reducer Status: " + response.isDone());
+            	
+            } catch (javax.ws.rs.ProcessingException e) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    System.err.println("WARNING: Sleep interrupted");
+                }
+                tries++;
+            }
+        }
 	}
 
 }

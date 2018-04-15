@@ -5,6 +5,7 @@ import api.storage.BlobStorage;
 import sys.storage.BlobStorageClient;
 import utils.Random;
 
+import javax.ws.rs.client.Invocation;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import java.io.File;
@@ -62,8 +63,8 @@ public class ComputeNodeTest {
 
         // Get the webservices SOAP class
         QName QNAME = new QName(ComputeNode.NAMESPACE, ComputeNode.NAME);
-//        Service service = Service.create( new URL("http://127.0.1.1:3333/mapreduce/?wsdl"), QNAME);
-        Service service = Service.create( new URL("http://192.168.1.15:3333/mapreduce/?wsdl"), QNAME);
+        Service service = Service.create( new URL("http://127.0.0.1:3333/mapreduce/?wsdl"), QNAME);
+//        Service service = Service.create( new URL("http://192.168.1.15:3333/mapreduce/?wsdl"), QNAME);
         ComputeNode computeNode = service.getPort( ComputeNode.class );
         System.out.println(  computeNode.getClass() );
         //7. Perform the WordCount computation, over the two blobs named "doc-*"
@@ -78,4 +79,5 @@ public class ComputeNodeTest {
             storage.readBlob(blob).forEach( System.out::println );
         });
     }
+    
 }

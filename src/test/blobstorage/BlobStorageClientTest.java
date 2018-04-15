@@ -22,13 +22,15 @@ public class BlobStorageClientTest {
     public static void main(String[] args) {
         storage = new BlobStorageClient();
         BlobWriter doc = storage.blobWriter("doc");
-        doc.writeLine("line");
-        doc.close();
-        String doc1 = storage.getNamenode().read("doc").get(0);
-        new DatanodeClient(URI.create("http://192.168.1.15:9999/datanode")).deleteBlock(doc1.substring(doc1.lastIndexOf("/")));
-        BlobReader strings = storage.readBlob("doc");
-        String s = strings.readLine();
-        System.out.println(s);
+        for(int i = 0; i<50; i++) {
+            doc.writeLine("bad backwards means dab. So dab your problems away");
+        }
+       doc.close();
+//        String doc1 = storage.getNamenode().read("doc").get(0);
+//        new DatanodeClient(URI.create("http://192.168.1.15:9999/datanode")).deleteBlock(doc1.substring(doc1.lastIndexOf("/")));
+//        BlobReader strings = storage.readBlob("doc");
+//        String s = strings.readLine();
+//       System.out.println(s);
 //        testWrite(100);
 //        testRead(100);
 

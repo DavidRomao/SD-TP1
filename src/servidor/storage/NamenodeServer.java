@@ -10,6 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Cláudio Pereira 47942
@@ -27,15 +30,16 @@ public class NamenodeServer implements Namenode {
         Send to the datanode the blocks recently deleted from the namenode table
          */
         /// TODO: 14/04/18 fix gargabe collector
+		GarbageCollector garbageCollector = new GarbageCollector();
+		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(garbageCollector, 20, 20, TimeUnit.SECONDS);
 //        new Thread(new GargageCollector()).start();
     }
-    public class GargageCollector implements Runnable{
+    public class GarbageCollector implements Runnable{
 
         @Override
         public void run() {
             while (true){
-                try {
-                    Thread.sleep(WAITING_TIME);
                     List<String> toRemove = new LinkedList<>();
                     suspects.forEach((name,blocks)-> {
                         try {
@@ -51,9 +55,6 @@ public class NamenodeServer implements Namenode {
                     // because there is chance that the table changed since the loop ended and the
                     //  a new blob was added before we removed all the old blobs
                     toRemove.forEach( suspects::remove );
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         }
     }
@@ -115,7 +116,7 @@ public class NamenodeServer implements Namenode {
             List<String> put = nametable.put(name, blocks);
 //            if (blocks.size() == 0)
 //                throw new WebApplicationException(Response.Status.NO_CONTENT);
-            //TODO  ask teacher if 200 OK is never returned
+            
         }
     }
 
