@@ -5,6 +5,10 @@ import java.net.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Cláudio Pereira 47942
+ * @author David Romao 49309
+ */
 public class Multicast {
 
     private final String ip;
@@ -53,9 +57,9 @@ public class Multicast {
                         System.err.println(request.getAddress());
                         System.err.println(request.getPort());
                     }
-                    System.err.println("Multicast.receive");
-                    System.err.println( "Address :" +request.getAddress());
-                    System.err.println("Port : " + request.getPort());
+//                    System.err.println("Multicast.receive");
+//                    System.err.println( "Address :" +request.getAddress());
+//                    System.err.println("Port : " + request.getPort());
                 }
 
             }

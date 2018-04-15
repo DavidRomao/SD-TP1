@@ -63,10 +63,10 @@ public class DatanodeServer implements Datanode {
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	private class GarbageCollectorDatanode implements Runnable {
+		Namenode namenode = new NamenodeClient();
 		@Override
 		public void run() {
-			Namenode namenodeClient = new NamenodeClient();
-			while (true) {
+//			while (true) {
 					unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
 						if (System.currentTimeMillis() - data.time > WaitingTime) {
@@ -74,7 +74,7 @@ public class DatanodeServer implements Datanode {
 							// if when the block was created a blob name was sent too
 							if (name != null) {
 								// if it's a lost block
-								if (!namenodeClient.exists(name, key)) {
+								if (!namenode.exists(name, key)) {
 									unverifiedBlocks.remove(key);
 									new File(key).delete();
 								}
@@ -82,15 +82,22 @@ public class DatanodeServer implements Datanode {
 							{
 								// if a blob name was not provided when the block was created ,
 								// perform a deep search on the namenode to try and find the block
-								if (!namenodeClient.exists(key))
+								if (!namenode.exists(key))
 									new File(key).delete();
 							}
 						}
 					});
 			}
-		}
+//		}
 	}
 
+	/**
+	 *
+	 * @param unverifiedBlocks
+	 * @param id the block id
+	 * @param l the block creation time
+	 * @param name the blob name of which the block belongs to
+	 */
 	private  void put(ConcurrentMap<String, DataSet> unverifiedBlocks, String id, long l,String name){
 		unverifiedBlocks.put(id, new DataSet(l,name));
 	}
@@ -126,7 +133,6 @@ public class DatanodeServer implements Datanode {
 		File file = new File(block);
 		if(file.exists()) {
 			boolean delete = file.delete();
-			assert delete;
 		}else {
 			throw new WebApplicationException( Status . NOT_FOUND );
 		}
@@ -149,6 +155,7 @@ public class DatanodeServer implements Datanode {
 			throw new WebApplicationException( Status.NOT_FOUND );
 		}
 	}
+
 	@Override
 	public void confirmBlocks(List<String> blocks) {
 		System.out.println("Received Confirmations");
@@ -157,11 +164,14 @@ public class DatanodeServer implements Datanode {
 	}
 
 	@Override
-	public void confirmDeletion(List<String> blocks, String name) {
+	public void confirmDeletion(List<String> blocks) {
 		for (String block : blocks) {
+//			System.err.println(" Received delete confirmation " + block);
 			File file = new File(block);
-			if (file.exists())
-				file.delete();
+			if (file.exists()) {
+				boolean delete = file.delete();
+				System.err.println(file.exists());
+			}
 		}
 	}
 

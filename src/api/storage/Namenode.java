@@ -1,6 +1,8 @@
 package api.storage;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
@@ -56,7 +58,7 @@ public interface Namenode {
 	@Consumes(MediaType.APPLICATION_JSON)
 	void update(@PathParam("name") String name, List<String> blocks);
 
-	// 204 No Content | 404 Not Found
+
 	/**
 	 *	All blocks with {@code prefix} are deleted
 	 * @param prefix

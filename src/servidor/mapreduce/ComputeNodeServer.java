@@ -16,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/**
+ * @author Cláudio Pereira 47942
+ * @author David Romao 49309
+ */
 @WebService(serviceName = ComputeNode.NAME,targetNamespace = ComputeNode.NAMESPACE,
         endpointInterface = ComputeNode.INTERFACE)
 public class ComputeNodeServer implements ComputeNode {

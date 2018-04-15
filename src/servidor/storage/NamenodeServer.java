@@ -1,11 +1,15 @@
 package servidor.storage;
 
+import api.storage.Datanode;
 import api.storage.Namenode;
 import sys.storage.DatanodeClient;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Cláudio Pereira 47942
@@ -22,41 +27,48 @@ public class NamenodeServer implements Namenode {
     public static final String NAMENODE = "Namenode";
     private ConcurrentMap<String,List<String>> nametable;
     private ConcurrentMap<String,List<String>> suspects;
-    private int WAITING_TIME = 20 * 1000;
+    private ConcurrentMap<String,Datanode> datanodes;
     public NamenodeServer() {
         this.nametable = new ConcurrentHashMap<>(10000);
         this.suspects = new ConcurrentHashMap<>(10000);
+        this.datanodes = new ConcurrentHashMap<>();
         /*
         Send to the datanode the blocks recently deleted from the namenode table
          */
         /// TODO: 14/04/18 fix gargabe collector
 		GarbageCollector garbageCollector = new GarbageCollector();
 		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(garbageCollector, 20, 20, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(garbageCollector, 10, 20, TimeUnit.SECONDS);
 //        new Thread(new GargageCollector()).start();
     }
     public class GarbageCollector implements Runnable{
 
         @Override
         public void run() {
-            while (true){
-                    List<String> toRemove = new LinkedList<>();
-                    suspects.forEach((name,blocks)-> {
-                        try {
-                            new DatanodeClient(
-                                    URI.create(name.substring(0,name.lastIndexOf("/"))))
-                                    .confirmDeletion(blocks,name);
-                        }catch (StringIndexOutOfBoundsException e){
-                            System.err.println("String with error " + name);
-                        }
-                        toRemove.add(name);
-                    });
+//            while (true){
+            List<String> toRemove = new LinkedList<>();
+            System.err.println(" GARBAGE COLLECTOR \n Suspects size : " + suspects.size());
+            for (String blobName : suspects.keySet()) {
+                List<String> blocks = suspects.get(blobName);
+                String uri = blocks.get(0).substring(0, blocks.get(0).lastIndexOf("/"));
+                try {
+                    Datanode datanode = datanodes.get(uri);
+                    if (datanode == null) {
+                        datanode = new DatanodeClient(URI.create(uri));
+                        datanodes.put(uri, datanode);
+                    }
+                    // extract block id from complete uri
+                    datanode.confirmDeletion(blocks.stream().map((s) -> s.substring(s.lastIndexOf("/") + 1)).collect(Collectors.toList()));
+                } catch (StringIndexOutOfBoundsException e) {
+                    System.err.println("");
+                }
+                toRemove.add(blobName);
+            }
                     // remove from the suspects the ones who were sent to the datanodes
-                    // because there is chance that the table changed since the loop ended and the
-                    //  a new blob was added before we removed all the old blobs
+                    // because there is chance that the table changed since the loop ended and
+                    // a new blob was added before we removed all the old blobs
                     toRemove.forEach( suspects::remove );
             }
-        }
     }
 
     @Override
@@ -93,9 +105,7 @@ public class NamenodeServer implements Namenode {
     public void create(String name, List<String> blocks) {
         System.err.println("NamenodeServer.create");
         System.err.println("Created " + name);
-        if (blocks.size()==0)
-            throw new WebApplicationException(Response.Status.NO_CONTENT);
-        else if (nametable.containsKey(name))
+       if (nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
         else {
             nametable.put(name,blocks);
@@ -104,19 +114,26 @@ public class NamenodeServer implements Namenode {
             // http://0.0.0.0:9999/datanode/blockid
             String uri = blocks.get(0);
             String ip_port_datanode = uri.substring(0, uri .lastIndexOf("/"));
-            new DatanodeClient(URI.create(ip_port_datanode)).confirmBlocks(blocks);
-        }
+
+            Datanode datanode = datanodes.get(ip_port_datanode);
+            if (datanode == null) {
+                datanode = new DatanodeClient(URI.create(ip_port_datanode));
+                datanodes.put(ip_port_datanode,datanode);
+            }
+            datanode.confirmBlocks(blocks);
+
+            throw new WebApplicationException(Response.Status.NO_CONTENT);
+       }
     }
 
     @Override
     public void update(String name, List<String> blocks) {
+        System.out.println("NamenodeServer.update");
         if (!nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
         else {
             List<String> put = nametable.put(name, blocks);
-//            if (blocks.size() == 0)
-//                throw new WebApplicationException(Response.Status.NO_CONTENT);
-            
+            throw new WebApplicationException(Response.Status.NO_CONTENT);
         }
     }
 
@@ -131,7 +148,9 @@ public class NamenodeServer implements Namenode {
             }
 
             // for garbage collector, make sure the block does not exist after some time
-            suspects.put(s,nametable.get(s));
+            List<String> blocks = nametable.get(s);
+            // datanode uri
+            suspects.put(s , blocks);
         }
         for (int j = 0; j < i; j++) {
             nametable.remove(toDelete[j]);

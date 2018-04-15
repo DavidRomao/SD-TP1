@@ -14,15 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-/*
- * Fake Datanode client.
- * 
- * Rather than invoking the Datanode via REST, executes
- * operations locally, in memory.
- * 
+/**
+ * @author Cláudio Pereira 47942
+ * @author David Romao 49309
  */
 public class DatanodeClient implements Datanode {
 
@@ -89,9 +85,8 @@ public class DatanodeClient implements Datanode {
 	}
 
 	@Override
-	public void confirmDeletion(List<String> blocks, String name) {
-		RestRequests.makePost(target.path("/validate/delete")
-								.queryParam("name",name).request()
+	public void confirmDeletion(List<String> blocks) {
+		RestRequests.makePost(target.path("/validate/delete").request()
 				,Entity.entity( blocks, MediaType.APPLICATION_JSON) ,Response.class);
 
 	}

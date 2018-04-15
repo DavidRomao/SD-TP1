@@ -6,7 +6,9 @@ import api.storage.Namenode;
 import com.google.gson.Gson;
 import org.glassfish.jersey.client.ClientConfig;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -14,11 +16,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-/*
- *
+/**
  * Namenode via REST
+ * @author Cláudio Pereira 47942
+ * @author David Romao 49309
  */
-@SuppressWarnings("deprecation")
 public class NamenodeClient implements Namenode {
 
     private static final String NAMENODE = "Namenode";
@@ -33,7 +35,8 @@ public class NamenodeClient implements Namenode {
         try {
             String namenodeURI = null;
             while (namenodeURI == null) {
-                Set<String> send = multicast.send(NAMENODE.getBytes(), 1000);
+                //todo change timeout
+                Set<String> send = multicast.send(NAMENODE.getBytes(), 100);
                 if (send.size()> 0)
                     namenodeURI = send.iterator().next();
             }
@@ -81,9 +84,13 @@ public class NamenodeClient implements Namenode {
 
 
     @Override
-	public void update(String name, List<String> blocks) {
+	public void update(String name, List<String> blocks ) {
         WebTarget path = target.path(name);
-        RestRequests.makePut(path.request(),Entity.entity(gson.toJson(blocks), MediaType.APPLICATION_JSON));
+        Response response = RestRequests.makePut(path.request(), Entity.json( gson.toJson( blocks) ));
+        System.out.println("NamenodeClient.update");
+        System.out.println("response = " + response.getStatus());
+        if (response.getStatus()>= 400)
+            response.getStringHeaders().forEach( ( a,b) -> System.out.printf("%s : %s ",a,b));
     }
 
     @SuppressWarnings("unchecked")

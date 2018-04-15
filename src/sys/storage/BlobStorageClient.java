@@ -27,13 +27,14 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     public BlobStorageClient() {
         this.namenode = new NamenodeClient();
         this.datanodes = new ConcurrentHashMap<>();
-        this.datanodesIterator = datanodes.values().iterator();
         discover(); // discover namenode servers
+        this.datanodesIterator = datanodes.values().iterator();
     }
 
     private void discover(){
         Multicast multicast = new Multicast();
-        Set<String> send = multicast.send("Datanode".getBytes(), 500);
+        // todo change timeout
+        Set<String> send = multicast.send("Datanode".getBytes(), 100);
         for (String s : send) {
             System.err.println(s);
             URI uri = URI.create(s + Datanode.PATH);
@@ -44,7 +45,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     }
     @Override
     public Iterator<Datanode> getDatanodesIterator() {
-        return datanodesIterator;
+        return datanodes.values().iterator();
     }
 
     @Override

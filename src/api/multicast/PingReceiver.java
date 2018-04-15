@@ -2,6 +2,11 @@ package api.multicast;
 
 import java.net.UnknownHostException;
 
+
+/**
+ * @author Cláudio Pereira 47942
+ * @author David Romao 49309
+ */
 public class PingReceiver implements Runnable{
 	
 	private final Multicast multicast;

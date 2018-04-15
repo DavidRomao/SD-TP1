@@ -51,20 +51,19 @@ class NamenodeClientTest {
 
         client.delete("endless1");
     }
-
+    @Test
     void update() {
         NamenodeClient client = new NamenodeClient();
         List<String> blocks = new ArrayList<>(100);
         for (int i = 0; i < 100; i++) {
-            blocks.add("Strings for test are endless");
+            blocks.add("http://localhost:9998/datanode/1234567");
         }
         List<String> blocks2 = new ArrayList<>(100);
         for (int i = 0; i < 100; i++) {
-            blocks.add("Strings for this test are endless");
+            blocks2.add("http://localhost:9998/datanode/12346");
         }
         client.create("endless",blocks);
         client.update("endless",blocks2);
-        List<String> endless = client.read("endless");
     }
 
 }

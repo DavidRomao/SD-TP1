@@ -34,13 +34,14 @@ public interface Datanode {
 	@POST
 	@Path("/validate/delete")
 	@Consumes(MediaType.APPLICATION_JSON)
-    void confirmDeletion(List<String> blocks,@QueryParam("name") String name);
+    void confirmDeletion(List<String> blocks);
 
     @POST
 	@Path("/mapper")
 	@Consumes(MediaType.APPLICATION_JSON)
-	void mapper( List<String> blocks, @QueryParam("jobClass")String jobClass,
-				 					  @QueryParam("outputPrefix") String outputPrefix,@QueryParam("worker") String worker);
+	void mapper( List<String> blocks, 	@QueryParam("jobClass")String jobClass,
+				 					 	@QueryParam("outputPrefix") String outputPrefix,
+				 						@QueryParam("worker") String worker);
 
 
     @POST
