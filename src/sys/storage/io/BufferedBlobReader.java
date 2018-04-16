@@ -60,7 +60,7 @@ public class BufferedBlobReader implements BlobReader {
 			datanode = new DatanodeClient(URI.create(String.format("http://"+key+"/datanode")));
 			datanodes.put(key,datanode);
 		}
-		byte[] data = datanode.readBlock(uri.getPath().split("/")[2]);
+		byte[] data = datanode.readBlock(block.substring(block.lastIndexOf("/")+1));
 		return Arrays.asList( new String(data).split("\\R"));
 	}
 	

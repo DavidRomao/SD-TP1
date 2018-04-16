@@ -160,7 +160,7 @@ public class DatanodeServer implements Datanode {
 	}
 
 	@Override
-	synchronized public void confirmDeletion(List<String> blocks) {
+	public void confirmDeletion(List<String> blocks) {
 		for (String block : blocks) {
 //			System.err.println(" Received delete confirmation " + block);
 			File file = new File(block);
