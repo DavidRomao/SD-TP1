@@ -1,15 +1,13 @@
 package api.storage;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path(Namenode.PATH)
 public interface Namenode {
 
-	static final String PATH="/namenode";
+	String PATH="/namenode";
 
 	/**
 	 *

@@ -7,7 +7,7 @@ import java.util.List;
 @Path( Datanode.PATH ) 
 public interface Datanode {
 
-	static final String PATH = "datanode";
+	String PATH = "datanode";
 	String BLOB_NAME = "blobName";
 
 	@POST

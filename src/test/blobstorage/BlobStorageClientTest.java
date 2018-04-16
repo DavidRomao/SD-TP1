@@ -4,9 +4,7 @@ import api.storage.BlobStorage;
 import api.storage.BlobStorage.BlobWriter;
 import org.junit.jupiter.api.Test;
 import sys.storage.BlobStorageClient;
-import sys.storage.DatanodeClient;
 
-import java.net.URI;
 import java.util.List;
 
 import static api.storage.BlobStorage.BlobReader;
@@ -21,11 +19,13 @@ public class BlobStorageClientTest {
 
     public static void main(String[] args) {
         storage = new BlobStorageClient();
+        storage.deleteBlobs("");
         BlobWriter doc = storage.blobWriter("doc");
         for(int i = 0; i<50; i++) {
             doc.writeLine("bad backwards means dab. So dab your problems away");
         }
        doc.close();
+        storage.deleteBlobs("");
 //        String doc1 = storage.getNamenode().read("doc").get(0);
 //        new DatanodeClient(URI.create("http://192.168.1.15:9999/datanode")).deleteBlock(doc1.substring(doc1.lastIndexOf("/")));
 //        BlobReader strings = storage.readBlob("doc");

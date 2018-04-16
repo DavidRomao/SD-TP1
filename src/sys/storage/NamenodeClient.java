@@ -6,9 +6,7 @@ import api.storage.Namenode;
 import com.google.gson.Gson;
 import org.glassfish.jersey.client.ClientConfig;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -36,7 +34,7 @@ public class NamenodeClient implements Namenode {
             String namenodeURI = null;
             while (namenodeURI == null) {
                 //todo change timeout
-                Set<String> send = multicast.send(NAMENODE.getBytes(), 100);
+                Set<String> send = multicast.send(NAMENODE.getBytes(), 1000);
                 if (send.size()> 0)
                     namenodeURI = send.iterator().next();
             }

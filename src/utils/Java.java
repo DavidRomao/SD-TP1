@@ -1,5 +1,8 @@
 package utils;
 
+import javax.tools.*;
+import javax.tools.JavaCompiler.CompilationTask;
+import javax.tools.JavaFileObject.Kind;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,17 +10,6 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.tools.DiagnosticCollector;
-import javax.tools.FileObject;
-import javax.tools.ForwardingJavaFileManager;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileManager;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.ToolProvider;
 
 /*
  * 
@@ -110,7 +102,7 @@ public class Java {
 		}
 
 		@Override
-		public OutputStream openOutputStream() throws IOException {
+		public OutputStream openOutputStream() {
 			return stream;
 		}
 

@@ -36,7 +36,7 @@ public class DatanodeClientTest {
     }
 
     private static void read(){
-        DatanodeClient client = new DatanodeClient(URI.create("http://0.0.0.0:9999/datanode"));
+        DatanodeClient client = new DatanodeClient(URI.create("http://192.168.1.15:9999/datanode"));
         String block1 = client.createBlock("this is a block data".getBytes(),"blob");
         byte[] block = client.readBlock(block1.substring(block1.lastIndexOf("/")+1));
         String s = new String(block);
@@ -65,7 +65,7 @@ public class DatanodeClientTest {
     }
     public static void main(String[] args) throws IOException {
 //    	createBlock();
-//    	read();
-        mapper();
+    	read();
+//        mapper();
     }
 }

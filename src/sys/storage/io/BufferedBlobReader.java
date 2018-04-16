@@ -3,6 +3,7 @@ package sys.storage.io;
 import api.storage.BlobStorage.BlobReader;
 import api.storage.Datanode;
 import api.storage.Namenode;
+import sys.storage.DatanodeClient;
 
 import java.net.URI;
 import java.util.*;
@@ -28,7 +29,7 @@ public class BufferedBlobReader implements BlobReader {
 	public BufferedBlobReader( String name, Namenode namenode, Map<String,Datanode> datanodes) {
 		this.name = name;
 		this.namenode = namenode;
-		this.datanodes = datanodes;
+		this.datanodes = new LinkedHashMap<>();
 		
 		this.blocks = this.namenode.read( name ).iterator();
 		this.lazyBlockIterator = new LazyBlockReader();
@@ -55,6 +56,10 @@ public class BufferedBlobReader implements BlobReader {
 		URI uri = URI.create(block);
 		String key = String.format("%s:%s", uri.getHost(), uri.getPort());
 		Datanode datanode = datanodes.get(key);
+		if (datanode == null) {
+			datanode = new DatanodeClient(URI.create(String.format("http://"+key+"/datanode")));
+			datanodes.put(key,datanode);
+		}
 		byte[] data = datanode.readBlock(uri.getPath().split("/")[2]);
 		return Arrays.asList( new String(data).split("\\R"));
 	}

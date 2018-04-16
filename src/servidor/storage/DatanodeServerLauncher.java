@@ -6,9 +6,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import utils.IP;
 
-import java.net.InetAddress;
 import java.net.URI;
-import java.net.UnknownHostException;
 
 /**
  * @author Cláudio Pereira 47942
@@ -17,7 +15,7 @@ import java.net.UnknownHostException;
 
 public class DatanodeServerLauncher {
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) {
 
         String URI_BASE;
 

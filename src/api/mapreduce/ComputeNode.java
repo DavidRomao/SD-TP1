@@ -6,10 +6,10 @@ import javax.xml.ws.WebFault;
 
 @WebService
 public interface ComputeNode {
-    static final String PATH = "/mapreduce";
-    static final String NAME = "ComputeService";
-    static final String NAMESPACE = "http://sd2018";
-    static final String INTERFACE = "api.mapreduce.ComputeNode";
+    String PATH = "/mapreduce";
+    String NAME = "ComputeService";
+    String NAMESPACE = "http://sd2018";
+    String INTERFACE = "api.mapreduce.ComputeNode";
 
     @WebFault
     class InvalidArgumentException extends Exception {

@@ -19,11 +19,7 @@ import java.io.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Cláudio Pereira 47942
@@ -37,7 +33,6 @@ public class DatanodeServer implements Datanode {
 	private ConcurrentMap<String,DataSet> unverifiedBlocks = new ConcurrentHashMap<>();
 	private BlobStorage storage;
     private String MapOutputBlobNameFormat;
-
 	class DataSet{
 		long time;
 		String name;
@@ -53,20 +48,20 @@ public class DatanodeServer implements Datanode {
 		System.err.println("URI base" + base_uri);
 		// Garbage Collector
 		// Launch the thread
-		// TODO: 14/04/18 fix and activate garbage collector
 		GarbageCollectorDatanode garbageCollector = new GarbageCollectorDatanode();
 		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(garbageCollector, 20, 20, TimeUnit.SECONDS);
-//		new Thread(new GarbageCollectorDatanode()).start();
         this.uri = URI.create(base_uri);
     }
 
 	@SuppressWarnings("InfiniteLoopStatement")
 	private class GarbageCollectorDatanode implements Runnable {
-		Namenode namenode = new NamenodeClient();
+		Namenode namenode = null;
 		@Override
 		public void run() {
 //			while (true) {
+			if (namenode == null)
+				namenode = new NamenodeClient();
 					unverifiedBlocks.forEach((key, data) -> {
 						// if the block is old enough
 						if (System.currentTimeMillis() - data.time > WaitingTime) {
@@ -131,12 +126,13 @@ public class DatanodeServer implements Datanode {
 		System.out.println("DatanodeServer.deleteBlock");
 		System.out.println("block = " + block);
 		File file = new File(block);
-		if(file.exists()) {
+		if (file.exists()) {
 			boolean delete = file.delete();
-		}else {
-			throw new WebApplicationException( Status . NOT_FOUND );
+			throw new WebApplicationException(Status.NO_CONTENT);
+		} else {
+			throw new WebApplicationException(Status.NOT_FOUND);
+
 		}
-		
 	}
 
 	@Override
@@ -164,7 +160,7 @@ public class DatanodeServer implements Datanode {
 	}
 
 	@Override
-	public void confirmDeletion(List<String> blocks) {
+	synchronized public void confirmDeletion(List<String> blocks) {
 		for (String block : blocks) {
 //			System.err.println(" Received delete confirmation " + block);
 			File file = new File(block);

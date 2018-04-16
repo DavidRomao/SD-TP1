@@ -4,19 +4,12 @@ import api.storage.Datanode;
 import api.storage.Namenode;
 import sys.storage.DatanodeClient;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -102,7 +95,7 @@ public class NamenodeServer implements Namenode {
     }
 
     @Override
-    public void create(String name, List<String> blocks) {
+    synchronized public void create(String name, List<String> blocks) {
         System.err.println("NamenodeServer.create");
         System.err.println("Created " + name);
        if (nametable.containsKey(name))
@@ -112,22 +105,28 @@ public class NamenodeServer implements Namenode {
             // validate the blocks stored on the datanodes, to prove they are not forgotten
             // as each blob is only stored in a datanode we can send the complete list just to one datanode
             // http://0.0.0.0:9999/datanode/blockid
-            String uri = blocks.get(0);
-            String ip_port_datanode = uri.substring(0, uri .lastIndexOf("/"));
+           try{
 
-            Datanode datanode = datanodes.get(ip_port_datanode);
-            if (datanode == null) {
-                datanode = new DatanodeClient(URI.create(ip_port_datanode));
-                datanodes.put(ip_port_datanode,datanode);
-            }
-            datanode.confirmBlocks(blocks);
+               String uri = blocks.get(0);
+               String ip_port_datanode = uri.substring(0, uri .lastIndexOf("/"));
 
-            throw new WebApplicationException(Response.Status.NO_CONTENT);
+               Datanode datanode = datanodes.get(ip_port_datanode);
+               if (datanode == null) {
+                   datanode = new DatanodeClient(URI.create(ip_port_datanode));
+                   datanodes.put(ip_port_datanode,datanode);
+               }
+               Datanode finalDatanode = datanode;
+               new Thread( () -> finalDatanode.confirmBlocks(blocks)).start();
+
+           }catch (IndexOutOfBoundsException e){
+               System.err.println(" Index out of bounds exception");
+           }
+           throw new WebApplicationException(Response.Status.NO_CONTENT);
        }
     }
 
     @Override
-    public void update(String name, List<String> blocks) {
+    synchronized public void update(String name, List<String> blocks) {
         System.out.println("NamenodeServer.update");
         if (!nametable.containsKey(name))
             throw new WebApplicationException(Response.Status.CONFLICT);
@@ -138,23 +137,28 @@ public class NamenodeServer implements Namenode {
     }
 
     @Override
-    public void delete(String prefix) {
+    synchronized public void delete(String prefix) {
         System.out.println("NamenodeServer.delete");
         int i = 0;
         String [] toDelete = new String[nametable.size()];
+        System.err.println("nametable size " + nametable.size());
         for (String s : nametable.keySet()) {
             if (s.startsWith(prefix)){
                 toDelete[i++]=s;
             }
 
             // for garbage collector, make sure the block does not exist after some time
+            System.err.println(" get " + s + " ");
             List<String> blocks = nametable.get(s);
+            System.err.println(" blocks size  " + blocks.size());
             // datanode uri
             suspects.put(s , blocks);
+            System.err.println("PUT DONE");
         }
         for (int j = 0; j < i; j++) {
             nametable.remove(toDelete[j]);
         }
+        System.err.println("Almost done");
         if (i == 0)throw new WebApplicationException(Response.Status.NOT_FOUND);
         else throw new WebApplicationException(Response.Status.NO_CONTENT);
     }

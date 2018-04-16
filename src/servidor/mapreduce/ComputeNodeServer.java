@@ -31,7 +31,7 @@ public class ComputeNodeServer implements ComputeNode {
     public boolean mapReduce(String jobClassBlob, String inputPrefix, String outputPrefix, int outPartSize) throws InterruptedException, InvalidArgumentException {
         System.out.println("ComputeNodeServer.mapReduce");
 
-        if (jobClassBlob == null || inputPrefix == null || outputPrefix == null || outPartSize <=0) {
+        if (jobClassBlob == null || inputPrefix == null || outputPrefix == null || outPartSize <0) {
             throw new InvalidArgumentException();
         }
         AtomicInteger workCount= new AtomicInteger();

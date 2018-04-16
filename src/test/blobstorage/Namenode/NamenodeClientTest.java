@@ -49,7 +49,7 @@ class NamenodeClientTest {
         }
         client.create("endless",blocks);
 
-        client.delete("endless1");
+        client.delete("endless1456");
     }
     @Test
     void update() {

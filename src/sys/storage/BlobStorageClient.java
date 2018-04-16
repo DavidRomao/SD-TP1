@@ -34,7 +34,7 @@ public class BlobStorageClient implements api.storage.BlobStorage{
     private void discover(){
         Multicast multicast = new Multicast();
         // todo change timeout
-        Set<String> send = multicast.send("Datanode".getBytes(), 100);
+        Set<String> send = multicast.send("Datanode".getBytes(), 1000);
         for (String s : send) {
             System.err.println(s);
             URI uri = URI.create(s + Datanode.PATH);

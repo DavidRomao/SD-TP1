@@ -27,7 +27,7 @@ public class ReducerTask extends MapReduceTask {
 		job.instance.reduce_init();
 
 		Object key = JSON.decode(Base58.decode(reduceKey), job.reducerKeyType());
-		System.out.println("Word being processed " + ((String) key));
+		System.out.println("Word being processed " + key);
 		Iterator<JsonDecoder> valuesIterators = storage.listBlobs( inputPrefix ).stream()
 			.map( name -> new JsonDecoder(storage.readBlob(name).iterator(), job.reducerValueType()))
 			.collect( Collectors.toList() ).iterator();
