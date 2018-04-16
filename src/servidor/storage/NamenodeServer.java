@@ -31,7 +31,7 @@ public class NamenodeServer implements Namenode {
         /// TODO: 14/04/18 fix gargabe collector
 		GarbageCollector garbageCollector = new GarbageCollector();
 		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(garbageCollector, 10, 20, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(garbageCollector, 50, 50, TimeUnit.SECONDS);
 //        new Thread(new GargageCollector()).start();
     }
     public class GarbageCollector implements Runnable{

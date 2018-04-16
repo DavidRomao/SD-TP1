@@ -50,7 +50,7 @@ public class DatanodeServer implements Datanode {
 		// Launch the thread
 		GarbageCollectorDatanode garbageCollector = new GarbageCollectorDatanode();
 		final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.scheduleAtFixedRate(garbageCollector, 20, 20, TimeUnit.SECONDS);
+		executor.scheduleAtFixedRate(garbageCollector, 50, 50, TimeUnit.SECONDS);
         this.uri = URI.create(base_uri);
     }
 
